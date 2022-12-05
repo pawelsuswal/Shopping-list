@@ -2,7 +2,7 @@
 
 .vscode
 
-vevn
+venv
 **/*.pyc
 
 .DS_Store
