@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
 
     # local apps
+    'home.apps.HomeConfig',
 ]
 
 MIDDLEWARE = [
