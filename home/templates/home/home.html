@@ -6,5 +6,7 @@
 
 {% block container %}
     <h2>Welcome to shopping list app</h2>
-    <p>Please login to access all features!</p>
+    {% if not user.is_authenticated %}
+        <p>Please login to access all features!</p>
+    {% endif %}
 {% endblock %}

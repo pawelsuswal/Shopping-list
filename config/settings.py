@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 
     # local apps
     'home.apps.HomeConfig',
+    'users.apps.UsersConfig'
 ]
 
 MIDDLEWARE = [
@@ -160,3 +161,4 @@ INTERNAL_IPS = [
 ]
 
 LOGIN_REDIRECT_URL = 'home:home'
+LOGOUT_REDIRECT_URL = 'home:home'
