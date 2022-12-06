@@ -1,0 +1,41 @@
+{% extends 'list_template.html' %}
+
+{% block title %}
+    Category list
+{% endblock %}
+
+{% block header %}
+    <h2>Categories</h2>
+{% endblock %}
+
+{% block create_url %}
+    {% url 'categories:create' %}
+{% endblock %}
+
+{% block create_description %}
+    New category
+{% endblock %}
+
+{% block favourite_list %}
+    {% for category in categories %}
+        {% if category.is_favourite %}
+            <li class="list-group-item list-group-item-warning">
+                {{ category.name }}
+                <a href="{% url 'categories:update' slug=category.slug %}" class="btn btn-success btn-sm">Edit</a>
+                <a href="{% url 'categories:delete' slug=category.slug %}" class="btn btn-danger btn-sm">Delete</a>
+            </li>
+        {% endif %}
+    {% endfor %}
+{% endblock %}
+
+{% block not_favourite_list %}
+    {% for category in categories %}
+        {% if not category.is_favourite %}
+            <li class="list-group-item ">
+                {{ category.name }}
+                <a href="{% url 'categories:update' slug=category.slug %}" class="btn btn-success btn-sm">Edit</a>
+                <a href="{% url 'categories:delete' slug=category.slug %}" class="btn btn-danger btn-sm">Delete</a>
+            </li>
+        {% endif %}
+    {% endfor %}
+{% endblock %}

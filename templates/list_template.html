@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block container %}
+    <h2>{% block header %}{% endblock %}</h2>
+    <a href="{% block create_url %}{% endblock %}" class="btn btn-success btn-lg" >{% block create_description %}{% endblock %}</a>
+    <ul class="list-group mt-3">
+        {% block favourite_list %}
+
+        {% endblock %}
+    </ul>
+    <ul class="list-group mt-3">
+        {% block not_favourite_list %}
+
+        {% endblock %}
+    </ul>
+
+{% endblock %}
