@@ -1,7 +1,7 @@
 {% extends 'list_template.html' %}
 
 {% block title %}
-    Category list
+    Categories list
 {% endblock %}
 
 {% block header %}
@@ -20,12 +20,9 @@
     {% for category in categories %}
         {% if category.is_favourite %}
             <li class="list-group-item list-group-item-warning">
-                <div class="row">
-                    <span class="col-sm text-black ">{{ category.name }}</span>
-
-                    <a href="{% url 'categories:update' slug=category.slug %}" class="btn btn-success btn-sm col-sm-2">Edit</a>
-                    <a href="{% url 'categories:delete' slug=category.slug %}" class="btn btn-danger btn-sm col-sm-2">Delete</a>
-                </div>
+                <span class="text-black ">{{ category.name }}</span>
+                <a href="{% url 'categories:update' slug=category.slug %}" class="btn btn-success btn-sm">Edit</a>
+                <a href="{% url 'categories:delete' slug=category.slug %}" class="btn btn-danger btn-sm">Delete</a>
             </li>
         {% endif %}
     {% endfor %}
@@ -35,11 +32,9 @@
     {% for category in categories %}
         {% if not category.is_favourite %}
             <li class="list-group-item">
-                <div class="row">
-                    <span class="col-sm text-black ">{{ category.name }}</span>
-                    <a href="{% url 'categories:update' slug=category.slug %}" class="btn btn-success btn-sm col-sm-2">Edit</a>
-                    <a href="{% url 'categories:delete' slug=category.slug %}" class="btn btn-danger btn-sm col-sm-2">Delete</a>
-                </div>
+                <span class="text-black ">{{ category.name }}</span>
+                <a href="{% url 'categories:update' slug=category.slug %}" class="btn btn-success btn-sm">Edit</a>
+                <a href="{% url 'categories:delete' slug=category.slug %}" class="btn btn-danger btn-sm">Delete</a>
             </li>
         {% endif %}
     {% endfor %}

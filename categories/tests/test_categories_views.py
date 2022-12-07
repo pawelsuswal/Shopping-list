@@ -28,7 +28,6 @@ def test_add_category(client, user):
         'is_favourite': True,
     }
     endpoint = reverse('categories:create')
-    # assert creating fresh new category
 
     before_categories = Category.objects.all().count()
 
@@ -40,18 +39,7 @@ def test_add_category(client, user):
     assert before_categories + 1 == after_categories.count()
     assert first_category.name == input_params['name']
     assert first_category.is_favourite == input_params['is_favourite']
-    assert first_category.is_active is True
-    assert first_category.slug == slugify(input_params['name'])
     assert first_category.user == user
-
-    # assert creating category, when one was deleted (deactivated in fact)
-    first_category.is_active = False
-    first_category.save()
-
-    client.post(endpoint, input_params)
-    first_category.refresh_from_db()
-
-    assert first_category.is_active is True
 
 
 def test_update_category(client, user):
@@ -68,15 +56,14 @@ def test_update_category(client, user):
     assert category.name == new_category_name
 
 
+#todo dopytać jak usunąć daną za pomocą widoku, gdy wymagane jest potwierdzenie ze strony na którą następuje przekierowanie
 def test_delete_category(client, user):
     # category should not be truly deleted but deactivated instead
     client.force_login(user)
     category = Category.objects.create(name='category 1', is_favourite=True, user=user)
 
-    assert category.is_active is True
-
     link = reverse('categories:delete', args=[category.slug])
-    client.get(link)
+    response = client.get(link)
 
     category.refresh_from_db()
-    assert category.is_active is False
+    assert category is None

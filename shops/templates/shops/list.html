@@ -1,0 +1,49 @@
+{% extends 'list_template.html' %}
+
+{% block title %}
+    Shops list
+{% endblock %}
+
+{% block header %}
+    <h2>Shops</h2>
+{% endblock %}
+
+{% block create_url %}
+    {% url 'shops:create' %}
+{% endblock %}
+
+{% block create_description %}
+    New shop
+{% endblock %}
+
+{% block favourite_list %}
+    {% if shops.count > 0 %}
+        {% for shop in shops %}
+            {% if shop.is_favourite %}
+                <li class="list-group-item list-group-item-warning">
+                    <span class=" text-black ">{{ shop.name }}</span>
+                    <a href="{% url 'shops:update' slug=shop.slug %}" class="btn btn-success btn-sm">Edit shop</a>
+                    <a href="{% url 'shops:reorder' slug=shop.slug %}" class="btn btn-success btn-sm">Reorder
+                        categories</a>
+                    <a href="{% url 'shops:delete' slug=shop.slug %}" class="btn btn-danger btn-sm">Delete</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <h3>You have no shops defined, please create new shop.</h3>
+    {% endif %}
+
+{% endblock %}
+
+{% block not_favourite_list %}
+    {% for shop in shops %}
+        {% if not shop.is_favourite %}
+            <li class="list-group-item">
+                <span class=" text-black ">{{ shop.name }}</span>
+                <a href="{% url 'shops:update' slug=shop.slug %}" class="btn btn-success btn-sm">Edit shop</a>
+                <a href="{% url 'shops:reorder' slug=shop.slug %}" class="btn btn-success btn-sm">Reorder categories</a>
+                <a href="{% url 'shops:delete' slug=shop.slug %}" class="btn btn-danger btn-sm">Delete</a>
+            </li>
+        {% endif %}
+    {% endfor %}
+{% endblock %}
