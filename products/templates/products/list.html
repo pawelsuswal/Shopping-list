@@ -1,0 +1,61 @@
+{% extends 'list_template.html' %}
+
+{% block title %}
+    Products list
+{% endblock %}
+
+{% block header %}
+    <h2>Products</h2>
+{% endblock %}
+
+{% block create_url %}
+    {% url 'products:create' %}
+{% endblock %}
+
+{% block create_description %}
+    New products
+{% endblock %}
+
+{% block favourite_list %}
+    <h4>Favourites</h4>
+    {% for category in categories_for_favourite_products %}
+        {% if category == '' %}
+            <li class="list-group-item list-group-item-info">No category assigned</li>
+        {% else %}
+            <li class="list-group-item list-group-item-info">{{ category }}</li>
+        {% endif %}
+        <ul>
+            {% for product in products %}
+                {% if product.is_favourite and product.category.name == category or product.is_favourite and product.category == None and category == '' %}
+                    <li class="list-group-item list-group-item-warning">
+                        <span class="text-black ">{{ product.name }}</span>
+                        <a href="{% url 'products:update' slug=product.slug %}" class="btn btn-success btn-sm">Edit</a>
+                        <a href="{% url 'products:delete' slug=product.slug %}" class="btn btn-danger btn-sm">Delete</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endfor %}
+{% endblock %}
+
+{% block not_favourite_list %}
+    <h4>Not in favourites</h4>
+    {% for category in categories_for_not_favourite_products %}
+        {% if category == '' %}
+            <li class="list-group-item list-group-item-info">No category assigned</li>
+        {% else %}
+            <li class="list-group-item list-group-item-info">{{ category }}</li>
+        {% endif %}
+        <ul>
+            {% for product in products %}
+                {% if not product.is_favourite and product.category.name == category or not product.is_favourite and product.category == None and category == '' %}
+                    <li class="list-group-item list-group-item-warning">
+                        <span class="text-black ">{{ product.name }}</span>
+                        <a href="{% url 'products:update' slug=product.slug %}" class="btn btn-success btn-sm">Edit</a>
+                        <a href="{% url 'products:delete' slug=product.slug %}" class="btn btn-danger btn-sm">Delete</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endfor %}
+{% endblock %}
