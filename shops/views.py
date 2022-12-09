@@ -33,6 +33,11 @@ class ShopCreateView(LoginRequiredMixin, CreateView):
         shop.save()
         return redirect('shops:list')
 
+# todo przenieść z post'a do form_valid
+    # def form_valid(self, form):
+    #     #     mój kod
+    #     return
+
     def get_form_kwargs(self):
         """ Passes the request object to the form class.
          This is necessary to only display members that belong to a given user"""

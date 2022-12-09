@@ -8,43 +8,73 @@
     <form action="" method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <ul class="list-group list-group-flush mt-3">
-            {% for product in products %}
-                <li class="list-group-item d-flex align-items-start list-group-item-warning">
+        {% for data in products_by_categories_and_favourites %}
+            <ul class="list-group list-group-flush mt-3">
+                {% for products_set in data.1 %}
+                    {% if products_set.0 == '' %}
+                        <li class="list-group-item list-group-item-info">No category assigned</li>
+                    {% else %}
+                        <li class="list-group-item list-group-item-info">{{ products_set.0 }}</li>
+                    {% endif %}
 
-                    <div class="container col-2">
-                        <input type="checkbox" name="product-id-{{ product.id }}" id="product-id-{{ product.id }}">
-                        <label for="product-id-{{ product.id }}">{{ product }}</label>
-                    </div>
-                    <div class="container">
-                        <div class="row ">
-                            <div class="row col-sm-3">
-                                <input type="number"
-                                       name="amount-id-{{ product.id }}"
-                                       id="amount-id-{{ product.id }}" min="0"
-                                       value="{{ product.default_amount }}"
-                                       class="col-6">
-                                <label class="col-6" for="amount-id-{{ product.id }}">:Amount</label>
-                            </div>
-                            <div class="col-sm-2">
-                                <select name="uom-id-{{ product.id }}" id="uom-id-{{ product.id }}">
-                                    {% for uom in UNITS_OF_MEASUREMENT %}
-                                        <option value={{ uom.0 }}>{{ uom.1 }}</option>
-                                    {% endfor %}
-                                </select>
-                                <label for="uom-id-{{ product.id }}">:Units</label>
-                            </div>
-                            <div class="row col-sm-7">
-                            <textarea name="comment-id-{{ product.id }}" id="comment-id-{{ product.id }}" cols="20"
-                                      rows="2" class="col-6"></textarea>
-                                <label class="col-6" for="comment-id-{{ product.id }}">:Comment</label>
+                    <ul>
+                        {% for product in products_set.1 %}
+                            {% if data.0 %}
+                                <li class="list-group-item d-flex align-items-start list-group-item-warning">
+                                    {% else %}
+                                <li class="list-group-item d-flex align-items-start">
+                            {% endif %}
+
+                        <div class="container col-2">
+                            <input type="checkbox" name="product-id-{{ product.id }}"
+                                   id="product-id-{{ product.id }}">
+                            <label for="product-id-{{ product.id }}">{{ product }}</label>
+                        </div>
+
+                        <div class="container">
+                            <div class="row ">
+
+                                <div class="row col-sm-3">
+                                    <input type="number"
+                                           name="amount-id-{{ product.id }}"
+                                           id="amount-id-{{ product.id }}" min="0"
+                                           value="{{ product.default_amount }}"
+                                           class="col-6">
+                                    <label class="col-6" for="amount-id-{{ product.id }}">:Amount</label>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <select name="uom-id-{{ product.id }}" id="uom-id-{{ product.id }}">
+                                        <option value="None" selected>--------</option>
+                                        {% for uom in UNITS_OF_MEASUREMENT %}
+                                            {% if product.default_uom == uom.1 %}
+                                                selected
+                                            {% endif %}
+                                            <option value={{ uom.0 }}
+                                                            {% if product.default_uom == uom.0 %}
+                                                                selected
+                                                            {% endif %}>{{ uom.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="uom-id-{{ product.id }}">:Units</label>
+                                </div>
+
+                                <div class="row col-sm-7">
+                                                <textarea name="comment-id-{{ product.id }}"
+                                                          id="comment-id-{{ product.id }}" cols="20"
+                                                          rows="2" class="col-6"></textarea>
+                                    <label class="col-6" for="comment-id-{{ product.id }}">:Comment</label>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
-        <input type="submit" value="Save" class="btn btn-sm btn-success">
-        <a href="{% url 'shopping_list:list' %}" class="btn btn-sm btn-success">Cancel</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+
+        <input type="submit" value="Save" class="btn btn-sm btn-success mt-3">
+        <a href="{% url 'shopping_list:list' %}" class="btn btn-sm btn-success mt-3">Cancel</a>
     </form>
 {% endblock %}

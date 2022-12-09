@@ -61,29 +61,34 @@ class ProductListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
 
         all_products = context['products']
-        favourite_products = all_products.filter(is_favourite=True)
-        not_favourite_products = all_products.filter(is_favourite=False)
-
-        categories_for_favourite_products = set()
-        for category in favourite_products.values('category__name'):
-            if category['category__name'] is not None:
-                categories_for_favourite_products.add(category['category__name'])
-            else:
-                categories_for_favourite_products.add('')
-
-        categories_for_favourite_products = list(categories_for_favourite_products)
-        categories_for_favourite_products.sort()
-
-        categories_for_not_favourite_products = set()
-        for category in not_favourite_products.values('category__name'):
-            if category['category__name'] is not None:
-                categories_for_not_favourite_products.add(category['category__name'])
-            else:
-                categories_for_not_favourite_products.add('')
-
-        categories_for_not_favourite_products = list(categories_for_not_favourite_products)
-        categories_for_not_favourite_products.sort()
-
+        categories_for_favourite_products, categories_for_not_favourite_products = get_categories_by_favourite(
+            all_products)
         context['categories_for_favourite_products'] = categories_for_favourite_products
         context['categories_for_not_favourite_products'] = categories_for_not_favourite_products
         return context
+
+
+def get_categories_by_favourite(all_products):
+    favourite_products = all_products.filter(is_favourite=True)
+    not_favourite_products = all_products.filter(is_favourite=False)
+
+    categories_for_favourite_products = set()
+    for category in favourite_products.values('category__name'):
+        if category['category__name'] is not None:
+            categories_for_favourite_products.add(category['category__name'])
+        else:
+            categories_for_favourite_products.add('')
+
+    categories_for_favourite_products = list(categories_for_favourite_products)
+    categories_for_favourite_products.sort()
+
+    categories_for_not_favourite_products = set()
+    for category in not_favourite_products.values('category__name'):
+        if category['category__name'] is not None:
+            categories_for_not_favourite_products.add(category['category__name'])
+        else:
+            categories_for_not_favourite_products.add('')
+
+    categories_for_not_favourite_products = list(categories_for_not_favourite_products)
+    categories_for_not_favourite_products.sort()
+    return categories_for_favourite_products, categories_for_not_favourite_products
