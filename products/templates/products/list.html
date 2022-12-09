@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block create_description %}
-    New products
+    New product
 {% endblock %}
 
 {% block favourite_list %}
@@ -27,10 +27,14 @@
         <ul>
             {% for product in products %}
                 {% if product.is_favourite and product.category.name == category or product.is_favourite and product.category == None and category == '' %}
-                    <li class="list-group-item list-group-item-warning">
+                    <li class="list-group-item d-flex justify-content-between align-items-start list-group-item-warning">
                         <span class="text-black ">{{ product.name }}</span>
-                        <a href="{% url 'products:update' slug=product.slug %}" class="btn btn-success btn-sm">Edit</a>
-                        <a href="{% url 'products:delete' slug=product.slug %}" class="btn btn-danger btn-sm">Delete</a>
+                        <div>
+                            <a href="{% url 'products:update' slug=product.slug %}"
+                               class="btn btn-success btn-sm">Edit</a>
+                            <a href="{% url 'products:delete' slug=product.slug %}"
+                               class="btn btn-danger btn-sm">Delete</a>
+                        </div>
                     </li>
                 {% endif %}
             {% endfor %}
@@ -49,10 +53,14 @@
         <ul>
             {% for product in products %}
                 {% if not product.is_favourite and product.category.name == category or not product.is_favourite and product.category == None and category == '' %}
-                    <li class="list-group-item list-group-item-warning">
+                    <li class="list-group-item d-flex justify-content-between align-items-start list-group-item-warning">
                         <span class="text-black ">{{ product.name }}</span>
-                        <a href="{% url 'products:update' slug=product.slug %}" class="btn btn-success btn-sm">Edit</a>
-                        <a href="{% url 'products:delete' slug=product.slug %}" class="btn btn-danger btn-sm">Delete</a>
+                        <div>
+                            <a href="{% url 'products:update' slug=product.slug %}"
+                               class="btn btn-success btn-sm">Edit</a>
+                            <a href="{% url 'products:delete' slug=product.slug %}"
+                               class="btn btn-danger btn-sm">Delete</a>
+                        </div>
                     </li>
                 {% endif %}
             {% endfor %}

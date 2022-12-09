@@ -50,36 +50,41 @@ class ShopUpdateView(LoginRequiredMixin, UpdateView):
     context_object_name = 'shop'
 
     def post(self, request, *args, **kwargs):
-        name = request.POST.get('name')
-        user = request.user
-        new_categories = request.POST.getlist('categories')
-        if request.POST.get('is_favourite') is None:
-            is_favourite = False
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        if form.is_valid():
+            name = request.POST.get('name')
+            user = request.user
+            new_categories = request.POST.getlist('categories')
+            if request.POST.get('is_favourite') is None:
+                is_favourite = False
+            else:
+                is_favourite = True
+
+            shops = Shop.objects.filter(name=name, user=user)
+
+            if not shops:
+                return super(ShopUpdateView, self).post(request)
+
+            shop = shops.first()
+            shop.is_favourite = is_favourite
+            for shop_category in shop.shopcategory_set.all():
+                if shop_category.category_id not in new_categories:
+                    shop_category.delete()
+            for count, shop_category in shop.shopcategory_set.all():
+                shop_category.order = count
+                shop_category.save()
+
+            categories_count = shop.shopcategory_set.all().count()
+            for category in new_categories:
+                if category not in shop.shopcategory_set.all().values_list('category_id'):
+                    shop.shopcategory_set.create(category_id=category, order=categories_count)
+                    categories_count += 1
+
+            shop.save()
+            return redirect('shops:list')
         else:
-            is_favourite = True
-
-        shops = Shop.objects.filter(name=name, user=user)
-
-        if not shops:
-            return super(ShopUpdateView, self).post(request)
-
-        shop = shops.first()
-        shop.is_favourite = is_favourite
-        for shop_category in shop.shopcategory_set.all():
-            if shop_category.category_id not in new_categories:
-                shop_category.delete()
-        for count, shop_category in shop.shopcategory_set.all():
-            shop_category.order = count
-            shop_category.save()
-
-        categories_count = shop.shopcategory_set.all().count()
-        for category in new_categories:
-            if category not in shop.shopcategory_set.all().values_list('category_id'):
-                shop.shopcategory_set.create(category_id=category, order=categories_count)
-                categories_count += 1
-
-        shop.save()
-        return redirect('shops:list')
+            return self.form_invalid(form)
 
     def get_form_kwargs(self):
         """ Passes the request object to the form class.
