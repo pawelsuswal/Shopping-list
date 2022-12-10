@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Shopping lists
+{% endblock %}
+
+{% block container %}
+    <h2>Shopping lists</h2>
+    <div class=" list-group list-group-flush d-flex justify-content-start align-items-start">
+        <div class="">
+            <a href="{% url 'shopping_list:create' %}" class="btn btn-success btn-lg">New shopping list</a>
+            <a href="{% url 'shopping_list:favourites' %}" class="btn btn-success btn-lg">Favourites</a>
+            <a href="{% url 'shopping_list:history' %}" class="btn btn-success btn-lg">History</a>
+        </div>
+    </div>
+    <ul class="list-group list-group-flush mt-3">
+        {% for item in data_to_render %}
+
+            <li class="list-group-item list-group-item-info d-flex mt-3 justify-content-between align-items-start">
+                <div class="row col-6">
+                    <div class="col-6">
+                        <span>{{ item.0.name }}</span>
+                    </div>
+                    <div class="col-6">
+                        {% if item.0.shop != None %}
+                            Shop: <span>{{ item.0.shop }}</span>
+                        {% else %}
+                            No shop chosen
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="">
+                    <a href="{% url 'shopping_list:update' slug=item.0.slug %}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'shopping_list:change_finish_status' slug=item.0.slug %}"
+                       class="btn btn-success btn-sm">Finished</a>
+                    <a href="{% url 'shopping_list:delete' slug=item.0.slug %}" class="btn btn-danger btn-sm">Delete</a>
+                </div>
+            </li>
+            <ul class="">
+                {% for product in item.1 %}
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="row col-6" id="{{ item.0.id }}_{{ product.product_id }}">
+                            <div class="col-6">
+                                <span> {{ product.product }}</span>
+                            </div>
+                            <div class="col">
+                                <span>{{ product.amount|floatformat:0 }}</span>
+                                {% if product.amount != '' and product.unit_of_measurement != 'None' %}
+                                    <span>{{ product.unit_of_measurement }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            {% if product.comment != '' %}
+                                <a href="{% url 'shopping_list:view_comment' slug=item.0.slug product_id=product.product_id %}?previous={{ request.path|urlencode }}#{{ item.0.id }}_{{ product.product_id }}"
+                                   class="btn btn-success btn-sm">View comment</a>
+                            {% endif %}
+                            {% if product.is_bought %}
+                                <a href="{% url 'shopping_list:change_product_status' slug=item.0.slug product_id=product.product_id %}#{{ item.0.id }}_{{ product.product_id }}"
+                                   class="btn btn-success btn-sm">Uncheck</a>
+                            {% else %}
+                                <a href="{% url 'shopping_list:change_product_status' slug=item.0.slug product_id=product.product_id %}#{{ item.0.id }}_{{ product.product_id }} "
+                                   class="btn btn-danger btn-sm">Check</a>
+                            {% endif %}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    </ul>
+{% endblock %}
