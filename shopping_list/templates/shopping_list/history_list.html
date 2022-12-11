@@ -11,51 +11,53 @@
             <a href="{% url 'shopping_list:list' %}" class="btn btn-success btn-lg">Back</a>
         </div>
     </div>
-        <ul class="list-group list-group-flush">
-            {% for item in data_to_render %}
-                <li class="list-group-item list-group-item-info d-flex mt-3 justify-content-between align-items-start">
-                    <div class="row col-6">
-                        <div class="col-6">
-                            <span>{{ item.0.name }}</span>
-                        </div>
-                        <div class="col-6">
-                            {% if item.0.shop != None %}
-                                Shop: <span>{{ item.0.shop }}</span>
-                            {% else %}
-                                No shop chosen
-                            {% endif %}
-                        </div>
+    <ul class="list-group list-group-flush">
+        {% for item in data_to_render %}
+            <li class="list-group-item list-group-item-info d-flex mt-3 justify-content-between align-items-start">
+                <div class="row col-6">
+                    <div class="col-6">
+                        <span>{{ item.0.name }}</span>
                     </div>
-                    <div class="">
-                        <a href="{% url 'shopping_list:change_finish_status' slug=item.0.slug %}"
-                           class="btn btn-success btn-sm">Not finished</a>
-                        <a href="{% url 'shopping_list:delete' slug=item.0.slug %}"
-                           class="btn btn-danger btn-sm">Delete</a>
+                    <div class="col-6">
+                        {% if item.0.shop != None %}
+                            Shop: <span>{{ item.0.shop }}</span>
+                        {% else %}
+                            No shop chosen
+                        {% endif %}
                     </div>
-                </li>
-                <ul class="">
-                    {% for product in item.1 %}
-                        <li class="list-group-item d-flex justify-content-between align-items-start">
-                            <div class="row col-6" id="{{ item.0.id }}_{{ product.product_id }}">
-                                <div class="col-6">
-                                    <span> {{ product.product }}</span>
-                                </div>
-                                <div class="col">
-                                    <span>{{ product.amount|floatformat:0 }}</span>
-                                    {% if product.amount != '' and product.unit_of_measurement != 'None' %}
-                                        <span>{{ product.unit_of_measurement }}</span>
-                                    {% endif %}
-                                </div>
+                </div>
+                <div class="">
+                    <a href="{% url 'shopping_list:create' %}?source={{ item.0.slug }}" class="btn btn-success btn-sm">Use
+                        as template</a>
+                    <a href="{% url 'shopping_list:change_finish_status' slug=item.0.slug %}"
+                       class="btn btn-warning btn-sm">Not finished</a>
+                    <a href="{% url 'shopping_list:delete' slug=item.0.slug %}"
+                       class="btn btn-danger btn-sm">Delete</a>
+                </div>
+            </li>
+            <ul class="">
+                {% for product in item.1 %}
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="row col-6" id="{{ item.0.id }}_{{ product.product_id }}">
+                            <div class="col-6">
+                                <span> {{ product.product }}</span>
                             </div>
-                            <div>
-                                {% if product.comment != '' %}
-                                    <a href="{% url 'shopping_list:view_comment' slug=item.0.slug product_id=product.product_id %}?previous={{ request.path|urlencode }}#{{ item.0.id }}_{{ product.product_id }}"
-                                       class="btn btn-success btn-sm">View comment</a>
+                            <div class="col">
+                                <span>{{ product.amount|floatformat:0 }}</span>
+                                {% if product.amount != '' and product.unit_of_measurement != 'None' %}
+                                    <span>{{ product.unit_of_measurement }}</span>
                                 {% endif %}
                             </div>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% endfor %}
-        </ul>
+                        </div>
+                        <div>
+                            {% if product.comment != '' %}
+                                <a href="{% url 'shopping_list:view_comment' slug=item.0.slug product_id=product.product_id %}?previous={{ request.path|urlencode }}#{{ item.0.id }}_{{ product.product_id }}"
+                                   class="btn btn-success btn-sm">View comment</a>
+                            {% endif %}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    </ul>
 {% endblock %}

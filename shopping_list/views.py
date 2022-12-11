@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
+from django.utils.text import slugify
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 
 from products.models import Product, UNITS_OF_MEASUREMENT
@@ -19,69 +20,50 @@ class ShoppingListCreateView(LoginRequiredMixin, CreateView):
     template_name = 'shopping_list/create.html'
     context_object_name = 'shopping_list'
 
+    def get_initial(self):
+        user = self.request.user
+        source_slug = self.request.GET.get('source')
+        source_shopping_list = ShoppingList.objects.filter(user=user, slug=source_slug)
+        initial = super().get_initial()
+
+        if source_shopping_list:
+            initial['name'] = source_shopping_list.first().name
+            initial['shop'] = source_shopping_list.first().shop
+
+        return initial
+
     def get_context_data(self, **kwargs):
         context = super(ShoppingListCreateView, self).get_context_data(**kwargs)
         user = self.request.user
+        source_slug = self.request.GET.get('source')
+        source_shopping_list = ShoppingList.objects.filter(user=user, slug=source_slug)
 
-        context['products_by_categories_and_favourites'] = get_all_products(user)
+        if source_shopping_list:
+            source_shopping_list = source_shopping_list.first()
+        else:
+            source_shopping_list = None
+
+        context['products_by_categories_and_favourites'] = get_all_products(user, source_shopping_list)
         context['UNITS_OF_MEASUREMENT'] = UNITS_OF_MEASUREMENT
+        context['source_shopping_list'] = source_shopping_list
         return context
 
     def form_valid(self, form):
         user = self.request.user
         form.instance.user = user
-        products_to_save = []
         try:
-            save_products_in_shopping_list(user, self.request.POST, form)
+            products_to_save = get_products_for_shopping_list(user, self.request.POST)
+
+            shopping_list = form.save()
+            user_id = str(shopping_list.user_id)
+            shopping_list_id = str(shopping_list.id)
+            shopping_list.slug = slugify('-'.join((user_id, shopping_list_id)))
+            shopping_list.save()
+            save_products_in_shopping_list(products_to_save, shopping_list)
         except ValueError:
             return super().form_invalid(form)
         except ObjectDoesNotExist:
             return super().form_invalid(form)
-        # for item in self.request.POST.items():
-        #     if 'product' not in item[0]:
-        #         continue
-        #
-        #     product_id = int(item[0].split('-id-')[1])
-        #     product = Product.objects.filter(user=user, id=product_id)
-        #
-        #     if not product:
-        #         return super().form_invalid(form)
-        #
-        #     product_id = str(product_id)
-        #     amount = self.request.POST[''.join(('amount-id-', product_id))]
-        #     uom = self.request.POST[''.join(('uom-id-', product_id))]
-        #     comment = self.request.POST[''.join(('comment-id-', product_id))]
-        #
-        #     if amount == '':
-        #         amount = None
-        #     else:
-        #         try:
-        #             amount = float(amount)
-        #         except ValueError:
-        #             return super().form_invalid(form)
-        #
-        #     if (not any(uom in uom_code for uom_code in UNITS_OF_MEASUREMENT) and uom != 'None'):
-        #         return super().form_invalid(form)
-        #
-        #     if uom == 'None' or uom == '':
-        #         uom = None
-        #
-        #     products_to_save.append({
-        #         'product': product,
-        #         'amount': amount,
-        #         'uom': uom,
-        #         'comment': comment,
-        #     })
-
-        # shopping_list = form.save()
-        #
-        # for product_to_save in products_to_save:
-        #     shopping_list.productshoppinglist_set.create(
-        #         product=product_to_save['product'].first(),
-        #         amount=product_to_save['amount'],
-        #         unit_of_measurement=product_to_save['uom'],
-        #         comment=product_to_save['comment'],
-        #     )
 
         return redirect('shopping_list:list')
 
@@ -122,7 +104,9 @@ class ShoppingListUpdateView(LoginRequiredMixin, UpdateView):
         user = self.request.user
         form.instance.user = user
         try:
-            save_products_in_shopping_list(user, self.request.POST, form)
+            products_to_save = get_products_for_shopping_list(user, self.request.POST)
+            shopping_list = form.save()
+            save_products_in_shopping_list(products_to_save, shopping_list)
         except ValueError:
             return super().form_invalid(form)
         except ObjectDoesNotExist:
@@ -166,10 +150,6 @@ class ShoppingListViewComment(LoginRequiredMixin, views.View):
     def get(self, request, slug, product_id):
         previous = request.GET.get('previous')
 
-        print('*' * 20)
-        print(request.GET)
-        print('*' * 20)
-
         shopping_list = ShoppingList.objects.filter(slug=slug)
         if not shopping_list:
             return redirect('shopping_list:list')
@@ -196,6 +176,7 @@ class ShoppingListUpdateFinishStatus(LoginRequiredMixin, views.View):
 
         return redirect('shopping_list:list')
 
+
 class ShoppingListHistoryListView(LoginRequiredMixin, views.View):
 
     def get(self, request):
@@ -205,6 +186,7 @@ class ShoppingListHistoryListView(LoginRequiredMixin, views.View):
         data_to_render = get_shopping_lists(shopping_lists)
 
         return render(request, 'shopping_list/history_list.html', {'data_to_render': data_to_render})
+
 
 class ShoppingListFavouritesListView(LoginRequiredMixin, views.View):
 
@@ -266,7 +248,7 @@ def get_all_products(user, shopping_list=None):
     return products_by_categories_and_favourites
 
 
-def save_products_in_shopping_list(user, post_data, form):
+def get_products_for_shopping_list(user, post_data):
     products_to_save = []
 
     for item in post_data.items():
@@ -302,11 +284,11 @@ def save_products_in_shopping_list(user, post_data, form):
             'uom': uom,
             'comment': comment,
         })
+    return products_to_save
 
-    shopping_list = form.save()
 
+def save_products_in_shopping_list(products_to_save, shopping_list):
     for product_to_save in products_to_save:
-        # ShoppingList.objects.all().first().productshoppinglist_set.update_or_create()
         shopping_list.productshoppinglist_set.update_or_create(
             product=product_to_save['product'],
             defaults={
