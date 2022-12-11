@@ -15,7 +15,7 @@ urlpatterns = [
          name='change_product_status'),
     path('update/finish/<slug:slug>', views.ShoppingListUpdateFinishStatus.as_view(), name='change_finish_status'),
     path('delete/<slug:slug>', views.ShoppingListDeleteView.as_view(), name='delete'),
-
+    path('share/<slug>', views.ShoppingListShareView.as_view(), name='share'),
     path('view/comment/<slug:slug>/<int:product_id>',
          views.ShoppingListViewComment.as_view(),
          name='view_comment'),

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Sharing
+{% endblock %}
+
+{% block container %}
+    <h4>Sharing shopping list - {{ shopping_list.name }}</h4>
+    <form action="" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="list-id" value="{{ shopping_list.id }}">
+        {% for item in data_to_display %}
+            <ul class="list-group list-group-flush mt-3">
+                <li class="list-group-item d-flex align-items-start">
+                    <div class="container">
+                        <input type="checkbox" name="friend-id-{{ item.friend.friend.id }}"
+                               id="friend-id-{{ item.friend.id }}" {% if item.already_shared %} checked {% endif %}>
+                        <label for="friend-id-{{ item.friend.id }}">{{ item.friend.friend }}</label>
+                    </div>
+                </li>
+            </ul>
+        {% endfor %}
+
+        <input type="submit" value="Share" class="btn btn-success mt-3">
+        <a href="{% url 'shopping_list:list' %}" class="btn btn-danger mt-3">Cancel</a>
+    </form>
+
+{% endblock %}

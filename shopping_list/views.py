@@ -1,12 +1,15 @@
+import itertools
+
 from django import views
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.utils.text import slugify
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 
+from friends.models import UserFriend
 from products.models import Product, UNITS_OF_MEASUREMENT
 from products.views import get_categories_by_favourite
 from shopping_list.forms import CreateShoppingListForm, ShowCommentForm
@@ -166,7 +169,7 @@ class ShoppingListViewComment(LoginRequiredMixin, views.View):
 
 
 class ShoppingListUpdateFinishStatus(LoginRequiredMixin, views.View):
-#todo czy to jest poprawnie, że baza jest modyfikowana get'em?
+    # todo czy to jest poprawnie, że baza jest modyfikowana get'em?
     def get(self, request, slug):
         shopping_list = ShoppingList.objects.filter(slug=slug)
 
@@ -198,6 +201,60 @@ class ShoppingListFavouritesListView(LoginRequiredMixin, views.View):
         data_to_render = get_shopping_lists(shopping_lists)
 
         return render(request, 'shopping_list/favourites_list.html', {'data_to_render': data_to_render})
+
+
+class ShoppingListShareView(LoginRequiredMixin, UpdateView):
+    model = ShoppingList
+    fields = ('name',)
+    success_url = reverse_lazy('shopping_list:list')
+    template_name = 'shopping_list/friend_list.html'
+    context_object_name = 'shopping_list'
+
+    def post(self, request, *args, **kwargs):
+
+        user = request.user
+        list_id = request.POST.get('list-id')
+
+        shopping_list = get_object_or_404(ShoppingList, user=user, id=list_id)
+
+        new_share_list = []
+
+        for item in request.POST:
+            if 'friend' in item:
+                friend_id = item.split('-id-')[1]
+                friend = get_object_or_404(UserFriend, user=user, friend_id=friend_id).friend
+                new_share_list.append(friend)
+
+        shopping_list.shared_with_list.set(new_share_list)
+
+        return redirect('shopping_list:list')
+
+    # todo czy tutaj zamiast get nie powinno być get_object_or_404? co się stanie jak nie będzie obiektu?
+    def get_context_data(self, **kwargs):
+        context = super(ShoppingListShareView, self).get_context_data()
+        user = self.request.user
+        shopping_list = context['shopping_list']
+
+        already_shared_with = shopping_list.shared_with_list.all().values_list('id', flat=True)
+
+        friends_list = UserFriend.objects.all().filter(user=user).order_by('friend__username')
+        data_to_display = []
+
+        for friend in friends_list.all():
+
+            if already_shared_with and friend.friend_id in already_shared_with:
+                already_shared = True
+            else:
+                already_shared = False
+
+            data_to_display.append(
+                {
+                    'friend': friend,
+                    'already_shared': already_shared,
+                }
+            )
+        context['data_to_display'] = data_to_display
+        return context
 
 
 def get_all_products(user, shopping_list=None):
