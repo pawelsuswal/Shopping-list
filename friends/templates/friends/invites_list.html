@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Invites
+{% endblock %}
+
+{% block container %}
+
+    <a href="{% url 'friends:friends_list' %}" class="btn btn-success btn-lg mb-3">Back</a>
+    <div class="row">
+        <div class="col-sm-6">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col" style="width: 80%">Invited by</th>
+                    <th scope="col" style="width: 10%"></th>
+                    <th scope="col" style="width: 10%"></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for invite in invites %}
+                    {% if invite.send_to == request.user %}
+                        <tr>
+                            <td>
+                                {{ invite.send_from.username }}
+                            </td>
+                            <td>
+                                <a href="{% url 'friends:invite_response' send_from=invite.send_from_id response=1 %}" class="btn btn-success btn-sm">Accept</a>
+                            </td>
+                            <td>
+                                <a href="{% url 'friends:invite_response' send_from=invite.send_from_id response=0 %}" class="btn btn-danger btn-sm">Decline</a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-sm-6">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col" style="width: 80%">Send to</th>
+                    <th scope="col" style="width: 10%"></th>
+                    <th scope="col" style="width: 10%"></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for invite in invites %}
+                    {% if invite.send_from == request.user %}
+                        <tr>
+                            <td>
+                                {{ invite.requested_friend_username }}
+                            </td>
+                            <td>
+                                <form action="{% url 'friends:delete_invite'%}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="pk" value="{{ invite.id }}">
+                                    <input type="submit" value="Cancel" class="btn btn-danger btn-sm">
+                                </form>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

@@ -166,6 +166,7 @@ class ShoppingListViewComment(LoginRequiredMixin, views.View):
 
 
 class ShoppingListUpdateFinishStatus(LoginRequiredMixin, views.View):
+#todo czy to jest poprawnie, że baza jest modyfikowana get'em?
     def get(self, request, slug):
         shopping_list = ShoppingList.objects.filter(slug=slug)
 

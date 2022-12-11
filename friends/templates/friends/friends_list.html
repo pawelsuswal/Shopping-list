@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Friends
+{% endblock %}
+
+{% block container %}
+    <a href="{% url 'friends:create_invite' %}" class="btn btn-success btn-lg">Invite</a>
+    <a href="{% url 'friends:invites_list' %}" class="btn btn-success btn-lg">Invites</a>
+
+{% endblock %}
