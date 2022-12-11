@@ -8,7 +8,7 @@
     <a href="{% url 'friends:friends_list' %}" class="btn btn-success btn-lg mb-3">Back</a>
     <form action=""method="post">
     {% csrf_token %}
-    {{ form }}
-        <input type="submit" name="save" id="save">
+    <p class="mt-3">{{ form }}</p>
+        <input type="submit" name="save" id="save" class="btn btn-success mt-3">
     </form>
 {% endblock %}

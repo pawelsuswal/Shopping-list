@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
+from django.http import HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView
@@ -74,6 +76,35 @@ class InviteDeleteView(LoginRequiredMixin, views.View):
         invite.delete()
         return redirect(reverse_lazy('friends:invites_list'))
 
+
 class FriendsListView(LoginRequiredMixin, ListView):
     model = UserFriend
     template_name = 'friends/friends_list.html'
+    context_object_name = 'friends'
+
+    def get_queryset(self):
+        query_set = super(FriendsListView, self).get_queryset()
+        query_set = query_set.filter(user=self.request.user)
+        return query_set
+
+
+class FriendDeleteView(LoginRequiredMixin, views.View):
+    def post(self, request):
+        user_id = request.user.id
+        friend_id = request.POST.get('pk')
+
+        print('*' * 20)
+        print(user_id)
+        print(friend_id)
+        print('*' * 20)
+
+        friend = UserFriend.objects.filter(user_id=user_id, friend_id=friend_id)
+        friend_reverse = UserFriend.objects.filter(user_id=friend_id, friend_id=user_id)
+        if not friend and not friend_reverse:
+            return HttpResponseNotFound('No object found')
+        if friend:
+            friend.first().delete()
+        if friend_reverse:
+            friend_reverse.first().delete()
+
+        return redirect(reverse_lazy('friends:friends_list'))

@@ -7,5 +7,30 @@
 {% block container %}
     <a href="{% url 'friends:create_invite' %}" class="btn btn-success btn-lg">Invite</a>
     <a href="{% url 'friends:invites_list' %}" class="btn btn-success btn-lg">Invites</a>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col" style="width: 90%">Friends</th>
+            <th scope="col" style="width: 10%"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for friend in friends %}
 
+            <tr>
+                <td>
+                    {{ friend.friend }}
+                </td>
+                <td>
+                    <form action="{% url 'friends:delete_friend' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="pk" value="{{ friend.friend_id }}">
+                        <input type="submit" value="Remove" class="btn btn-danger btn-sm">
+                    </form>
+                </td>
+            </tr>
+
+        {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
