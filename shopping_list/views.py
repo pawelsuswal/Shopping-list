@@ -30,7 +30,7 @@ class ShoppingListCreateView(LoginRequiredMixin, CreateView):
         source_shopping_list = ShoppingList.objects.filter(user=user, slug=source_slug)
         initial = super().get_initial()
 
-        if source_shopping_list:
+        if source_shopping_list.exists():
             initial['name'] = source_shopping_list.first().name
             initial['shop'] = source_shopping_list.first().shop
 
@@ -171,7 +171,7 @@ class ShoppingListViewComment(LoginRequiredMixin, views.View):
 
 
 class ShoppingListUpdateFinishStatus(LoginRequiredMixin, views.View):
-    # todo czy to jest poprawnie, że baza jest modyfikowana get'em?
+    # todo czy to jest poprawnie, że baza jest modyfikowana get'em? Przenieść na POST
     def get(self, request, slug):
         shopping_list = ShoppingList.objects.filter(slug=slug)
 
@@ -231,7 +231,7 @@ class ShoppingListShareView(LoginRequiredMixin, UpdateView):
 
         return redirect('shopping_list:list')
 
-    # todo czy tutaj zamiast get nie powinno być get_object_or_404? co się stanie jak nie będzie obiektu?
+    # todo czy tutaj zamiast get nie powinno być get_object_or_404? co się stanie jak nie będzie obiektu? można użyć get_object_or_404
     def get_context_data(self, **kwargs):
         context = super(ShoppingListShareView, self).get_context_data()
         user = self.request.user
@@ -239,7 +239,7 @@ class ShoppingListShareView(LoginRequiredMixin, UpdateView):
 
         already_shared_with = shopping_list.shared_with_list.all().values_list('id', flat=True)
 
-        friends_list = UserFriend.objects.all().filter(user=user).order_by('friend__username')
+        friends_list = UserFriend.objects.filter(user=user).order_by('friend__username')
         data_to_display = []
 
         for friend in friends_list.all():

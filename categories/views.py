@@ -11,18 +11,6 @@ class CategoryCreateView(LoginRequiredMixin, CreateView):
     fields = ('name', 'is_favourite')
     template_name = 'categories/create.html'
 
-    # def post(self, request, *args, **kwargs):
-    #     name = request.POST['name']
-    #     categories = Category.objects.filter(name=name)
-    #
-    #     if categories:
-    #         category = categories.first()
-    #         category.is_active = True
-    #         category.save()
-    #         return redirect('categories:list')
-    #
-    #     return super().post(request, *args, **kwargs)
-
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super().form_valid(form)

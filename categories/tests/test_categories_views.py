@@ -1,5 +1,4 @@
 from django.urls import reverse
-from django.utils.text import slugify
 
 from categories.models import Category
 
@@ -23,32 +22,32 @@ def test_categories_redirect_without_logged_user(client):
 
 def test_add_category(client, user):
     client.force_login(user)
-    input_params = {
+    input_parameters = {
         'name': 'test category',
         'is_favourite': True,
     }
     endpoint = reverse('categories:create')
 
-    before_categories = Category.objects.all().count()
+    before_categories = Category.objects.count()
 
-    client.post(endpoint, input_params)
+    client.post(endpoint, input_parameters)
 
     after_categories = Category.objects.all()
     first_category = after_categories.first()
 
     assert before_categories + 1 == after_categories.count()
-    assert first_category.name == input_params['name']
-    assert first_category.is_favourite == input_params['is_favourite']
+    assert first_category.name == input_parameters['name']
+    assert first_category.is_favourite == input_parameters['is_favourite']
     assert first_category.user == user
 
 
 def test_update_category(client, user):
     client.force_login(user)
     category = Category.objects.create(name='category 1', is_favourite=True, user=user)
-    link = reverse('categories:update', args=[category.slug])
+    endpoint = reverse('categories:update', args=[category.slug])
     new_category_name = 'category 2'
 
-    response = client.post(link, {'name': new_category_name, 'is_favourite': category.is_favourite})
+    response = client.post(endpoint, {'name': new_category_name, 'is_favourite': category.is_favourite})
 
     assert response.status_code == 302
 
@@ -56,14 +55,22 @@ def test_update_category(client, user):
     assert category.name == new_category_name
 
 
-#todo dopytać jak usunąć daną za pomocą widoku, gdy wymagane jest potwierdzenie ze strony na którą następuje przekierowanie
-def test_delete_category(client, user):
-    # category should not be truly deleted but deactivated instead
+def test_delete_category_confirmation(client, user):
     client.force_login(user)
     category = Category.objects.create(name='category 1', is_favourite=True, user=user)
 
-    link = reverse('categories:delete', args=[category.slug])
-    response = client.get(link)
+    endpoint = reverse('categories:delete', args=[category.slug])
+    response = client.get(endpoint)
 
-    category.refresh_from_db()
-    assert category is None
+    assert response.status_code == 200
+
+
+def test_delete_category(client, user):
+    client.force_login(user)
+    category = Category.objects.create(name='category 1', is_favourite=True, user=user)
+
+    endpoint = reverse('categories:delete', args=[category.slug])
+    response = client.post(endpoint)
+
+    assert response.status_code == 302
+    assert not Category.objects.filter(id=category.id)

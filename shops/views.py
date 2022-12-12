@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, ListView, DeleteView
 from django import views
@@ -15,28 +15,16 @@ class ShopCreateView(LoginRequiredMixin, CreateView):
     template_name = 'shops/create.html'
     context_object_name = 'shop'
 
-    # todo wyjaśnić obsługę danych i jak skorzystać z is_valid
-    #     dodatkowo dowiedzieć sie czy można to zrobić jakoś w form_valid
-    def post(self, request, *args, **kwargs):
-        name = request.POST['name']
-        user = request.user
-        if request.POST.get('is_favourite') is None:
-            is_favourite = False
-        else:
-            is_favourite = True
+    def form_valid(self, form):
+        user = self.request.user
+        name = form.cleaned_data['name']
+        is_favourite = form.cleaned_data['is_favourite']
+        categories = form.cleaned_data['categories']
+        shop = Shop.objects.create(user=user, name=name, is_favourite=is_favourite)
+        for count, category in enumerate(categories):
+            shop.shopcategory_set.create(category=category, order=count)
 
-        shop = Shop.objects.create(name=name, user=user, is_favourite=is_favourite)
-
-        for count, category in enumerate(request.POST.getlist('categories')):
-            shop.shopcategory_set.create(category_id=category, order=count)
-
-        shop.save()
         return redirect('shops:list')
-
-# todo przenieść z post'a do form_valid
-    # def form_valid(self, form):
-    #     #     mój kod
-    #     return
 
     def get_form_kwargs(self):
         """ Passes the request object to the form class.
@@ -54,42 +42,32 @@ class ShopUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'shops/create.html'
     context_object_name = 'shop'
 
-    def post(self, request, *args, **kwargs):
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        if form.is_valid():
-            name = request.POST.get('name')
-            user = request.user
-            new_categories = request.POST.getlist('categories')
-            if request.POST.get('is_favourite') is None:
-                is_favourite = False
-            else:
-                is_favourite = True
+    def form_valid(self, form):
+        shop = form.save(commit=False)
+        shop_categories = shop.shopcategory_set.all()
 
-            shops = Shop.objects.filter(name=name, user=user)
+        if 'categories' in form.changed_data:
+            categories_id_list = list(form.cleaned_data['categories'].order_by('name').values_list('id', flat=True))
+            order_to_assign = -1
 
-            if not shops:
-                return super(ShopUpdateView, self).post(request)
-
-            shop = shops.first()
-            shop.is_favourite = is_favourite
-            for shop_category in shop.shopcategory_set.all():
-                if shop_category.category_id not in new_categories:
+            for shop_category in shop_categories:
+                if shop_category.category_id not in categories_id_list:
                     shop_category.delete()
-            for count, shop_category in shop.shopcategory_set.all():
+                else:
+                    categories_id_list.remove(shop_category.category_id)
+                    if shop_category.order > order_to_assign:
+                        order_to_assign = shop_category.order
+
+            for category_id in categories_id_list:
+                order_to_assign += 1
+                shop.shopcategory_set.create(category_id=category_id, order=order_to_assign)
+
+            for count, shop_category in enumerate(shop.shopcategory_set.all()):
                 shop_category.order = count
                 shop_category.save()
 
-            categories_count = shop.shopcategory_set.all().count()
-            for category in new_categories:
-                if category not in shop.shopcategory_set.all().values_list('category_id'):
-                    shop.shopcategory_set.create(category_id=category, order=categories_count)
-                    categories_count += 1
-
-            shop.save()
-            return redirect('shops:list')
-        else:
-            return self.form_invalid(form)
+        shop.save()
+        return redirect('shops:list')
 
     def get_form_kwargs(self):
         """ Passes the request object to the form class.
@@ -119,42 +97,61 @@ class ShopListView(LoginRequiredMixin, ListView):
 
 class ShopCategoriesReorderedView(LoginRequiredMixin, views.View):
     def get(self, request, slug):
-        shop_categories = Shop.objects.get(slug=slug).shopcategory_set.all().order_by('order')
+        user = request.user
+        shop_categories = get_object_or_404(Shop, user=user, slug=slug).shopcategory_set.order_by('order')
         return render(request, 'shops/reorder_categories.html', {'shop_categories': shop_categories})
 
+    @staticmethod
+    def _move_top(shop, shop_category):
+        shop_category.order = -1
+        shop_category.save()
+        for count, shop_category in enumerate(shop.shopcategory_set.all().order_by('order')):
+            shop_category.order = count
+            shop_category.save()
+
+    @staticmethod
+    def _move_up(shop, shop_category):
+        if shop_category.order > 0:
+            shop_category_prev = shop.shopcategory_set.get(order=shop_category.order - 1)
+            shop_category_prev.order = shop_category.order
+            shop_category.order -= 1
+
+            shop_category_prev.save()
+            shop_category.save()
+
+    @staticmethod
+    def _move_down(shop, shop_category):
+        if shop_category.order < shop.shopcategory_set.all().count() - 1:
+            shop_category_next = shop.shopcategory_set.get(order=shop_category.order + 1)
+            shop_category_next.order = shop_category.order
+            shop_category.order += 1
+
+            shop_category_next.save()
+            shop_category.save()
+
+    @staticmethod
+    def _move_bottom(shop, shop_category):
+        shop_category.order = -1
+        shop_category.save()
+        for count, shop_category in enumerate(shop.shopcategory_set.all().order_by('order')):
+            shop_category.order = count
+            shop_category.save()
+
     def post(self, request, slug, category):
-        shop = Shop.objects.get(slug=slug)
+        user = request.user
+        shop = get_object_or_404(Shop, user=user, slug=slug)
         shop_category = shop.shopcategory_set.get(category_id=category)
 
         if 'top' in request.POST:
-            shop_category.order = -1
-            shop_category.save()
+            self._move_top(shop, shop_category)
 
         elif 'up' in request.POST:
-            if shop_category.order > 0:
-                shop_category_prev = shop.shopcategory_set.get(order=shop_category.order - 1)
-                shop_category_prev.order = shop_category.order
-                shop_category.order -= 1
-
-                shop_category_prev.save()
-                shop_category.save()
+            self._move_up(shop, shop_category)
 
         elif 'down' in request.POST:
-            if shop_category.order < shop.shopcategory_set.all().count() - 1:
-                shop_category_next = shop.shopcategory_set.get(order=shop_category.order + 1)
-                shop_category_next.order = shop_category.order
-                shop_category.order += 1
-
-                shop_category_next.save()
-                shop_category.save()
+            self._move_down(shop, shop_category)
 
         elif 'bottom' in request.POST:
-            shop_category.order = shop.shopcategory_set.all().count()
-            shop_category.save()
-
-        if 'top' in request.POST or 'bottom' in request.POST:
-            for count, shop_category in enumerate(shop.shopcategory_set.all().order_by('order')):
-                shop_category.order = count
-                shop_category.save()
+            self._move_bottom(shop, shop_category)
 
         return redirect('shops:reorder', slug)
