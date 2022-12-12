@@ -2,6 +2,7 @@ import itertools
 
 from django import views
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -129,8 +130,9 @@ class ShoppingListListView(LoginRequiredMixin, views.View):
     def get(self, request):
         user = request.user
 
-        shopping_lists = ShoppingList.objects.filter(user=user, is_finished=False).order_by('-created_on')
-        data_to_render = get_shopping_lists(shopping_lists)
+        shopping_lists = ShoppingList.objects.filter(Q(user=user) | Q(shared_with_list=user),
+                                                     is_finished=False).order_by('-created_on')
+        data_to_render = get_shopping_lists(shopping_lists, user)
 
         return render(request, 'shopping_list/main_list.html', {'data_to_render': data_to_render})
 
@@ -267,7 +269,12 @@ def get_all_products(user, shopping_list=None):
     for data_set in products_by_categories_and_favourites:
         is_favourite = data_set[0]
 
-        for category in categories_for_favourite_products:
+        if is_favourite:
+            category_set = categories_for_favourite_products
+        else:
+            category_set = categories_for_not_favourite_products
+
+        for category in category_set:
             if category == '':
                 category = None
 
@@ -357,12 +364,12 @@ def save_products_in_shopping_list(products_to_save, shopping_list):
         )
 
 
-def get_shopping_lists(shopping_lists):
+def get_shopping_lists(shopping_lists, user=None):
     uom = dict(UNITS_OF_MEASUREMENT)
     data_to_render = []
     for shopping_list in shopping_lists:
         products = []
-        if shopping_list.shop == None:
+        if shopping_list.shop is None:
             products_query_set = shopping_list.productshoppinglist_set.all().order_by('product__name')
             for product in products_query_set.all():
                 if product.amount is None:
@@ -391,5 +398,9 @@ def get_shopping_lists(shopping_lists):
 
             products = sorted(products, key=lambda x: (x.order, x.product.name,))
 
-        data_to_render.append([shopping_list, products])
+        shared = False
+        if user is not None and shopping_list.user != user:
+            shared = True
+
+        data_to_render.append([shopping_list, products, shared])
     return data_to_render

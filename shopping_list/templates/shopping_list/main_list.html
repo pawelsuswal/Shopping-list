@@ -30,11 +30,18 @@
                     </div>
                 </div>
                 <div class="">
-                    <a href="{% url 'shopping_list:share' slug=item.0.slug %}" class="btn btn-info btn-sm">Share</a>
-                    <a href="{% url 'shopping_list:update' slug=item.0.slug %}" class="btn btn-warning btn-sm">Edit</a>
+
+                    {% if item.2 %}
+                        <button disabled class="btn btn-info btn-sm">Shared</button>
+                    {% else %}
+                        <a href="{% url 'shopping_list:share' slug=item.0.slug %}" class="btn btn-info btn-sm">Share</a>
+                        <a href="{% url 'shopping_list:update' slug=item.0.slug %}"
+                           class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'shopping_list:delete' slug=item.0.slug %}"
+                           class="btn btn-danger btn-sm">Delete</a>
+                    {% endif %}
                     <a href="{% url 'shopping_list:change_finish_status' slug=item.0.slug %}"
                        class="btn btn-success btn-sm">Finished</a>
-                    <a href="{% url 'shopping_list:delete' slug=item.0.slug %}" class="btn btn-danger btn-sm">Delete</a>
                 </div>
             </li>
             <ul class="">
