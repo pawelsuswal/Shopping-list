@@ -19,15 +19,6 @@ class ShoppingList(models.Model):
     shared_with_list = models.ManyToManyField(get_user_model(), related_name='shared_with',  blank=True)
     slug = models.SlugField(unique=True)
 
-    # class Meta:
-    #     unique_together = ('name', 'user')
-
-    # def save(self, *args, **kwargs):
-    #     user_id = str(self.user_id)
-    #     shopping_list_id = str(self.id)
-    #     self.slug = slugify('-'.join((user_id, shopping_list_id)))
-    #     super(ShoppingList, self).save(*args, **kwargs)
-
     def __str__(self):
         return self.name
 

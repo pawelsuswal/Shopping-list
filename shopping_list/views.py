@@ -57,7 +57,6 @@ class ShoppingListCreateView(LoginRequiredMixin, CreateView):
         form.instance.user = user
         try:
             products_to_save = get_products_for_shopping_list(user, self.request.POST)
-
             shopping_list = form.save()
             user_id = str(shopping_list.user_id)
             shopping_list_id = str(shopping_list.id)
@@ -110,6 +109,7 @@ class ShoppingListUpdateView(LoginRequiredMixin, UpdateView):
         try:
             products_to_save = get_products_for_shopping_list(user, self.request.POST)
             shopping_list = form.save()
+            clear_products_in_shopping_list(shopping_list)
             save_products_in_shopping_list(products_to_save, shopping_list)
         except ValueError:
             return super().form_invalid(form)
@@ -139,7 +139,8 @@ class ShoppingListListView(LoginRequiredMixin, views.View):
 
 class ShoppingListUpdateProductStatus(LoginRequiredMixin, views.View):
     def get(self, request, slug, product_id):
-        shopping_list = ShoppingList.objects.filter(slug=slug)
+        user = request.user
+        shopping_list = ShoppingList.objects.filter(user=user, slug=slug)
 
         if shopping_list:
             shopping_list = shopping_list.first()
@@ -153,9 +154,10 @@ class ShoppingListUpdateProductStatus(LoginRequiredMixin, views.View):
 class ShoppingListViewComment(LoginRequiredMixin, views.View):
 
     def get(self, request, slug, product_id):
+        user = request.user
         previous = request.GET.get('previous')
 
-        shopping_list = ShoppingList.objects.filter(slug=slug)
+        shopping_list = ShoppingList.objects.filter(user=user, slug=slug)
         if not shopping_list:
             return redirect('shopping_list:list')
 
@@ -173,7 +175,8 @@ class ShoppingListViewComment(LoginRequiredMixin, views.View):
 class ShoppingListUpdateFinishStatus(LoginRequiredMixin, views.View):
     # todo czy to jest poprawnie, że baza jest modyfikowana get'em? Przenieść na POST
     def get(self, request, slug):
-        shopping_list = ShoppingList.objects.filter(slug=slug)
+        user = request.user
+        shopping_list = ShoppingList.objects.filter(user=user, slug=slug)
 
         if shopping_list:
             shopping_list = shopping_list.first()
@@ -362,6 +365,11 @@ def save_products_in_shopping_list(products_to_save, shopping_list):
                 'comment': product_to_save['comment'],
             }
         )
+
+
+def clear_products_in_shopping_list(shopping_list: ShoppingList):
+    for product in shopping_list.productshoppinglist_set.all():
+        product.delete()
 
 
 def get_shopping_lists(shopping_lists, user=None):
