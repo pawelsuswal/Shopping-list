@@ -9,6 +9,13 @@ def user(db, django_user_model, faker):
                                             username=faker.user_name(),
                                             password=faker.password(length=10, special_chars=False))
 
+@pytest.fixture()
+def user2(db, django_user_model, faker):
+    """ Create django user"""
+    return django_user_model.objects.create(email=faker.name(),
+                                            username=faker.user_name(),
+                                            password=faker.password(length=10, special_chars=False))
+
 
 
 

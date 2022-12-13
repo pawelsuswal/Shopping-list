@@ -2,6 +2,7 @@ from django.urls import reverse
 from django.utils.text import slugify
 
 from categories.models import Category
+from friends.models import Invite, UserFriend
 from products.models import Product, UNITS_OF_MEASUREMENT
 from shopping_list.models import ShoppingList
 from shops.models import Shop
@@ -118,3 +119,29 @@ def add_products_to_shopping_list(shopping_list: ShoppingList, user, faker, coun
             unit_of_measurement=uom_to_save,
             comment=comment_to_save,
         )
+
+
+def create_fake_invite_to_non_existing_user(user):
+    Invite.objects.create(
+        send_from=user,
+        requested_friend_username='User_name_not_exist'
+    )
+
+
+def create_fake_invite_to_existing_user(user1, user2):
+    Invite.objects.create(
+        send_from=user1,
+        send_to=user2,
+        requested_friend_username=user2.username
+    )
+
+
+def create_fake_friend(user1, user2):
+    UserFriend.objects.create(
+        user=user1,
+        friend=user2,
+    )
+    UserFriend.objects.create(
+        user=user2,
+        friend=user1,
+    )

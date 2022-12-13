@@ -21,7 +21,7 @@ class InviteCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         user = self.request.user
         form.instance.send_from = user
-        send_to_username = form.instance.requested_friend_username
+        send_to_username = form.cleaned_data['requested_friend_username']
 
         get_user_from_invitation = get_user_model().objects.filter(username=send_to_username)
         if get_user_from_invitation:
@@ -92,11 +92,6 @@ class FriendDeleteView(LoginRequiredMixin, views.View):
     def post(self, request):
         user_id = request.user.id
         friend_id = request.POST.get('pk')
-
-        print('*' * 20)
-        print(user_id)
-        print(friend_id)
-        print('*' * 20)
 
         friend = UserFriend.objects.filter(user_id=user_id, friend_id=friend_id)
         friend_reverse = UserFriend.objects.filter(user_id=friend_id, friend_id=user_id)
