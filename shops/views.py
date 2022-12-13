@@ -131,7 +131,8 @@ class ShopCategoriesReorderedView(LoginRequiredMixin, views.View):
 
     @staticmethod
     def _move_bottom(shop, shop_category):
-        shop_category.order = -1
+        categories_order_list = list(shop.shopcategory_set.order_by('order').values_list('order', flat=True))
+        shop_category.order = categories_order_list[-1]+1
         shop_category.save()
         for count, shop_category in enumerate(shop.shopcategory_set.all().order_by('order')):
             shop_category.order = count
@@ -143,6 +144,7 @@ class ShopCategoriesReorderedView(LoginRequiredMixin, views.View):
         shop_category = shop.shopcategory_set.get(category_id=category)
 
         if 'top' in request.POST:
+
             self._move_top(shop, shop_category)
 
         elif 'up' in request.POST:
