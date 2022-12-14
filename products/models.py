@@ -16,6 +16,7 @@ UNITS_OF_MEASUREMENT = [
 
 
 class Product(models.Model):
+    """Representation of product"""
     name = models.CharField(max_length=255)
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, blank=True, null=True)
@@ -33,6 +34,8 @@ class Product(models.Model):
         unique_together = ('name', 'user')
 
     def save(self, *args, **kwargs):
+        """Build custom slug on object save"""
+
         pk = str(self.user_id)
         name = self.name
         self.slug = slugify('-'.join((pk, name)))
