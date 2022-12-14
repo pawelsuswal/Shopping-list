@@ -9,6 +9,7 @@ from products.models import Product
 
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
+    """Display view for create new product"""
     success_url = reverse_lazy('products:list')
     model = Product
     form_class = CreateProductForm
@@ -16,6 +17,7 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     context_object_name = 'product'
 
     def form_valid(self, form):
+        """Add user information, necessary to save category object"""
         form.instance.user = self.request.user
         return super().form_valid(form)
 
@@ -29,6 +31,7 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
 
 
 class ProductUpdateView(LoginRequiredMixin, UpdateView):
+    """Display view for editing existing product"""
     success_url = reverse_lazy('products:list')
     model = Product
     form_class = CreateProductForm
@@ -44,6 +47,7 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class ProductDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete selected product"""
     success_url = reverse_lazy('products:list')
     model = Product
     template_name = '../templates/delete_confirmation.html'
@@ -52,15 +56,18 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class ProductListView(LoginRequiredMixin, ListView):
+    """Display all products for logged user"""
     template_name = 'products/list.html'
     model = Product
     context_object_name = 'products'
     allow_empty = 1
 
     def get_queryset(self):
+        """Setup queryset to show only products for current user sorted by favourites, categories and name"""
         return Product.objects.filter(user=self.request.user).order_by('-is_favourite', 'category__name', 'name')
 
     def get_context_data(self, **kwargs):
+        """Load additional data to view about categories for products"""
         context = super().get_context_data(**kwargs)
 
         all_products = context['products']
@@ -73,6 +80,7 @@ class ProductListView(LoginRequiredMixin, ListView):
 
 
 def get_categories_by_favourite(all_products):
+    """Return 2 lists of categories - one for favourite products and second for not favourites one"""
     categories_for_favourite_products = all_products.filter(is_favourite=True).values_list('category__name')
     categories_for_favourite_products = set(categories_for_favourite_products)
     categories_for_favourite_products = list(itertools.chain(*categories_for_favourite_products))

@@ -18,11 +18,15 @@ UNITS_OF_MEASUREMENT = [
 class Product(models.Model):
     name = models.CharField(max_length=255)
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, blank=True, null=True)
     is_favourite = models.BooleanField(default=False)
     default_amount = models.FloatField(validators=[MinValueValidator(0)],
+                                       blank=True,
                                        null=True)
-    default_uom = models.CharField(max_length=20, choices=UNITS_OF_MEASUREMENT, null=True)
+    default_uom = models.CharField(max_length=20,
+                                   choices=UNITS_OF_MEASUREMENT,
+                                   blank=True,
+                                   null=True)
     slug = models.SlugField(unique=1)
 
     class Meta:

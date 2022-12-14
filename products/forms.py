@@ -13,10 +13,8 @@ class CreateProductForm(forms.ModelForm):
         widgets = {'category': RadioSelect()}
 
     def __init__(self, *args, **kwargs):
+        """Setup queryset for categories to show only categories related for current user"""
         self.request = kwargs.pop('request')
         super(CreateProductForm, self).__init__(*args, **kwargs)
         self.fields['category'].queryset = Category.objects.filter(user=self.request.user)
-        self.fields['default_amount'].required = False
-        self.fields['default_uom'].required = False
-        self.fields['category'].required = False
 
