@@ -10,6 +10,7 @@ from random import sample, randint
 
 
 def assert_view_get_without_user(client, endpoint):
+    """Check if given endpoint will redirect to login page"""
     response = client.get(endpoint)
 
     assert response.status_code == 302
@@ -17,6 +18,7 @@ def assert_view_get_without_user(client, endpoint):
 
 
 def create_fake_categories(user, faker, count=1):
+    """Create given amount of fake categories"""
     for _ in range(1, count + 1):
         Category.objects.create(**{
             'name': faker.word(),
@@ -26,6 +28,7 @@ def create_fake_categories(user, faker, count=1):
 
 
 def create_fake_shop(user, faker, count=1):
+    """Create given amount of fake shops with categories assigned"""
     categories_count = 10
     create_fake_categories(user, faker, count=categories_count)
     categories_id = list(Category.objects.all().values_list('id', flat=True))
@@ -42,6 +45,7 @@ def create_fake_shop(user, faker, count=1):
 
 
 def create_fake_products(user, faker, count=1, create_categories=True):
+    """Create given amount of fake products with assigned categories"""
     uom_count = len(UNITS_OF_MEASUREMENT) - 1
     if create_categories:
         create_fake_categories(user, faker, 10)
@@ -61,6 +65,7 @@ def create_fake_products(user, faker, count=1, create_categories=True):
 
 
 def create_fake_shopping_lists(user, faker, count=1, favourite=False, finished=False, shops_count=1):
+    """Create given amount of shopping lists with shop assigned"""
     create_fake_shop(user, faker, shops_count)
     shops_ids = list(Shop.objects.order_by('id').values_list('id', flat=True))
     is_favourite = False
@@ -87,6 +92,7 @@ def create_fake_shopping_lists(user, faker, count=1, favourite=False, finished=F
 def add_products_to_shopping_list(shopping_list: ShoppingList, user, faker, count=1, bought=False, amount=False,
                                   uom=False,
                                   comment=False):
+    """Add given amount of products to given shopping list"""
     create_fake_products(user, faker, create_categories=False)
     products_ids = list(Product.objects.order_by('id').values_list('id', flat=True))
     is_bought = False
@@ -122,6 +128,7 @@ def add_products_to_shopping_list(shopping_list: ShoppingList, user, faker, coun
 
 
 def create_fake_invite_to_non_existing_user(user):
+    """Create fake invite from given user for non-existing user"""
     Invite.objects.create(
         send_from=user,
         requested_friend_username='User_name_not_exist'
@@ -129,6 +136,7 @@ def create_fake_invite_to_non_existing_user(user):
 
 
 def create_fake_invite_to_existing_user(user1, user2):
+    """Create fake invite from given user for existing user"""
     Invite.objects.create(
         send_from=user1,
         send_to=user2,
@@ -137,6 +145,7 @@ def create_fake_invite_to_existing_user(user1, user2):
 
 
 def create_fake_friend(user1, user2):
+    """Create fake friend"""
     UserFriend.objects.create(
         user=user1,
         friend=user2,
