@@ -4,7 +4,8 @@ from django.utils.text import slugify
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=255, unique=1)
+    """Model of products category"""
+    name = models.CharField(max_length=255)
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     is_favourite = models.BooleanField(default=False)
     slug = models.SlugField(unique=1)
@@ -13,6 +14,7 @@ class Category(models.Model):
         unique_together = ('name', 'user')
 
     def save(self, *args, **kwargs):
+        """Build custom slug on object save"""
         pk = str(self.user_id)
         name = self.name
         self.slug = slugify('-'.join((pk, name)))
