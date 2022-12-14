@@ -8,6 +8,7 @@ from testutils import assert_view_get_without_user
 
 
 def test_create_shop_get(client, user):
+    """Check if view for create new shop is loading"""
     client.force_login(user)
     endpoint = reverse('shops:create')
     response = client.get(endpoint)
@@ -17,11 +18,13 @@ def test_create_shop_get(client, user):
 
 
 def test_create_shop_get_without_user(client):
+    """Check if view for create new shop is redirecting not logged user to login page"""
     endpoint = reverse('shops:create')
     assert_view_get_without_user(client, endpoint)
 
 
 def test_create_shop_post(db, client, user, faker):
+    """Check if shop is created on post method"""
     client.force_login(user)
     create_fake_categories(user, faker, 3)
     category_id = Category.objects.first().id
@@ -38,7 +41,20 @@ def test_create_shop_post(db, client, user, faker):
     assert Shop.objects.get(name='aaa')
 
 
+def test_update_shop_get(client, user, faker):
+    """Check if view for update new shop is loading"""
+    client.force_login(user)
+    create_fake_shop(user, faker, 1)
+    shop = Shop.objects.first()
+    endpoint = reverse('shops:update', args=[shop.slug])
+    response = client.get(endpoint)
+    assert response.status_code == 200
+    form_in_view = response.context['form']
+    assert isinstance(form_in_view, CreateShopForm)
+
+
 def test_update_shop_get_without_user(client, user, faker):
+    """Check if view for update existing shop is redirecting not logged user to login page"""
     create_fake_shop(user, faker, 1)
     shop = Shop.objects.first()
     endpoint = reverse('shops:update', args=[shop.slug])
@@ -46,6 +62,7 @@ def test_update_shop_get_without_user(client, user, faker):
 
 
 def test_update_shop_post(client, user, faker):
+    """Check if shop is updated on post method"""
     client.force_login(user)
 
     create_fake_shop(user, faker, 1)
@@ -69,6 +86,7 @@ def test_update_shop_post(client, user, faker):
 
 
 def test_delete_shop_get(client, user, faker):
+    """Check if view for delete existing shop is loading confirmation page"""
     client.force_login(user)
 
     create_fake_shop(user, faker, 1)
@@ -81,6 +99,7 @@ def test_delete_shop_get(client, user, faker):
 
 
 def test_delete_shop_get_without_user(client, user, faker):
+    """Check if delete request is redirecting not logged user to login page"""
     create_fake_shop(user, faker, 1)
     shop = Shop.objects.first()
     endpoint = reverse('shops:delete', args=[shop.slug])
@@ -88,6 +107,7 @@ def test_delete_shop_get_without_user(client, user, faker):
 
 
 def test_delete_shop_post(client, user, faker):
+    """Check if shop is deleted on post method"""
     client.force_login(user)
 
     create_fake_shop(user, faker, 1)
@@ -103,6 +123,7 @@ def test_delete_shop_post(client, user, faker):
 
 
 def test_shops_list_get(client, user, faker):
+    """Check if view for list of shops is loading"""
     client.force_login(user)
     create_fake_shop(user, faker, 1)
 
@@ -114,11 +135,13 @@ def test_shops_list_get(client, user, faker):
 
 
 def test_shops_list_get_without_user(client):
+    """Check if view for list of shops is redirecting not logged user to login page"""
     endpoint = reverse('shops:list')
     assert_view_get_without_user(client, endpoint)
 
 
 def test_shops_reorder_categories_get(db, client, user, faker):
+    """Check if view for categories reordering is loading"""
     client.force_login(user)
 
     create_fake_shop(user, faker)
@@ -139,6 +162,7 @@ def test_shops_reorder_categories_get(db, client, user, faker):
 
 
 def test_shops_reorder_categories_get_without_user(client, user, faker):
+    """Check if view for categories reordering redirecting not logged user to login page"""
     create_fake_shop(user, faker)
     shop = Shop.objects.first()
 
@@ -147,6 +171,7 @@ def test_shops_reorder_categories_get_without_user(client, user, faker):
 
 
 def test_shops_reorder_categories_post_up(db, client, user, faker):
+    """Check if changing category order by one up is working"""
     client.force_login(user)
 
     create_fake_shop(user, faker)
@@ -170,6 +195,7 @@ def test_shops_reorder_categories_post_up(db, client, user, faker):
 
 
 def test_shops_reorder_categories_post_down(db, client, user, faker):
+    """Check if changing category order by one down is working"""
     client.force_login(user)
 
     create_fake_shop(user, faker)
@@ -193,6 +219,7 @@ def test_shops_reorder_categories_post_down(db, client, user, faker):
 
 
 def test_shops_reorder_categories_post_top(db, client, user, faker):
+    """Check if changing category order to top is working"""
     client.force_login(user)
 
     create_fake_shop(user, faker)
@@ -214,6 +241,7 @@ def test_shops_reorder_categories_post_top(db, client, user, faker):
 
 
 def test_shops_reorder_categories_post_bottom(db, client, user, faker):
+    """Check if changing category order to bottom is working"""
     client.force_login(user)
 
     create_fake_shop(user, faker)

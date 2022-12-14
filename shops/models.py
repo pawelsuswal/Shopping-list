@@ -8,6 +8,7 @@ from categories.models import Category
 
 # Create your models here.
 class Shop(models.Model):
+    """Representation of shop"""
     name = models.CharField(max_length=255)
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     is_favourite = models.BooleanField(default=False)
@@ -18,6 +19,7 @@ class Shop(models.Model):
         unique_together = ('name', 'user')
 
     def save(self, *args, **kwargs):
+        """Build custom slug on object save"""
         pk = str(self.user_id)
         name = self.name
         self.slug = slugify('-'.join((pk, name)))
@@ -28,6 +30,7 @@ class Shop(models.Model):
 
 
 class ShopCategory(models.Model):
+    """Representation of relation between shops and categories"""
     shop = models.ForeignKey('Shop', on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     order = models.IntegerField()

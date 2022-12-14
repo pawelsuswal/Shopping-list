@@ -16,7 +16,7 @@ def test_create_product_get(client, user):
 
 
 def test_create_product_get_without_user(client):
-    """Check if page for create new product is redirecting not logged user to login page"""
+    """Check if view for create new product is redirecting not logged user to login page"""
     endpoint = reverse('products:create')
     assert_view_get_without_user(client, endpoint)
 
@@ -50,7 +50,7 @@ def test_update_product_get(db, client, user, faker):
 
 
 def test_update_product_get_without_user(db, client, user, faker):
-    """Check if page for update existing product is redirecting not logged user to login page"""
+    """Check if view for update existing product is redirecting not logged user to login page"""
     create_fake_products(user, faker, 3)
     product = Product.objects.first()
     endpoint = reverse('products:update', args=[product.slug])

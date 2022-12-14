@@ -9,6 +9,7 @@ from shops.models import Shop
 
 
 class ShopCreateView(LoginRequiredMixin, CreateView):
+    """Display view for create new shop"""
     success_url = reverse_lazy('shops:list')
     model = Shop
     form_class = CreateShopForm
@@ -16,6 +17,7 @@ class ShopCreateView(LoginRequiredMixin, CreateView):
     context_object_name = 'shop'
 
     def form_valid(self, form):
+        """Manually save data (shop and then categories with correct order) from form"""
         user = self.request.user
         name = form.cleaned_data['name']
         is_favourite = form.cleaned_data['is_favourite']
@@ -36,6 +38,7 @@ class ShopCreateView(LoginRequiredMixin, CreateView):
 
 
 class ShopUpdateView(LoginRequiredMixin, UpdateView):
+    """Display view for editing existing shop"""
     success_url = reverse_lazy('shops:list')
     model = Shop
     form_class = CreateShopForm
@@ -43,6 +46,7 @@ class ShopUpdateView(LoginRequiredMixin, UpdateView):
     context_object_name = 'shop'
 
     def form_valid(self, form):
+        """Manually save data (shop and then categories with correct order) from form"""
         shop = form.save(commit=False)
         shop_categories = shop.shopcategory_set.all()
 
@@ -79,6 +83,7 @@ class ShopUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class ShopDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete selected shop"""
     success_url = reverse_lazy('shops:list')
     model = Shop
     template_name = '../templates/delete_confirmation.html'
@@ -86,23 +91,28 @@ class ShopDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class ShopListView(LoginRequiredMixin, ListView):
+    """Display all shops for logged user"""
     template_name = 'shops/list.html'
     model = Shop
     context_object_name = 'shops'
     allow_empty = 1
 
     def get_queryset(self):
+        """Setup queryset to show only shops for current user sorted by favourites and name"""
         return Shop.objects.filter(user=self.request.user).order_by('-is_favourite', 'name')
 
 
 class ShopCategoriesReorderedView(LoginRequiredMixin, views.View):
+    """Display view for reordering categories order in relation to shop"""
     def get(self, request, slug):
+        """Display categories from requested shop for changing order"""
         user = request.user
         shop_categories = get_object_or_404(Shop, user=user, slug=slug).shopcategory_set.order_by('order')
         return render(request, 'shops/reorder_categories.html', {'shop_categories': shop_categories})
 
     @staticmethod
     def _move_top(shop, shop_category):
+        """Move category to top"""
         shop_category.order = -1
         shop_category.save()
         for count, shop_category in enumerate(shop.shopcategory_set.all().order_by('order')):
@@ -111,6 +121,7 @@ class ShopCategoriesReorderedView(LoginRequiredMixin, views.View):
 
     @staticmethod
     def _move_up(shop, shop_category):
+        """Move category one position up"""
         if shop_category.order > 0:
             shop_category_prev = shop.shopcategory_set.get(order=shop_category.order - 1)
             shop_category_prev.order = shop_category.order
@@ -121,6 +132,7 @@ class ShopCategoriesReorderedView(LoginRequiredMixin, views.View):
 
     @staticmethod
     def _move_down(shop, shop_category):
+        """Move category one position down"""
         if shop_category.order < shop.shopcategory_set.all().count() - 1:
             shop_category_next = shop.shopcategory_set.get(order=shop_category.order + 1)
             shop_category_next.order = shop_category.order
@@ -131,6 +143,7 @@ class ShopCategoriesReorderedView(LoginRequiredMixin, views.View):
 
     @staticmethod
     def _move_bottom(shop, shop_category):
+        """Move category to bottom"""
         categories_order_list = list(shop.shopcategory_set.order_by('order').values_list('order', flat=True))
         shop_category.order = categories_order_list[-1]+1
         shop_category.save()
@@ -139,6 +152,7 @@ class ShopCategoriesReorderedView(LoginRequiredMixin, views.View):
             shop_category.save()
 
     def post(self, request, slug, category):
+        """Change category position according option chosen by user"""
         user = request.user
         shop = get_object_or_404(Shop, user=user, slug=slug)
         shop_category = shop.shopcategory_set.get(category_id=category)
