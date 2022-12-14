@@ -4,6 +4,7 @@ from categories.models import Category
 
 
 def test_categories_loaded(client, user):
+    """Check if view of categories is loading"""
     client.force_login(user)
 
     endpoint = reverse('categories:list')
@@ -14,6 +15,7 @@ def test_categories_loaded(client, user):
 
 
 def test_categories_redirect_without_logged_user(client):
+    """Check if list of categories is not accessible without logged user"""
     endpoint = reverse('categories:list')
     response = client.get(endpoint)
 
@@ -21,6 +23,7 @@ def test_categories_redirect_without_logged_user(client):
 
 
 def test_add_category(client, user):
+    """Check if adding new category is working"""
     client.force_login(user)
     input_parameters = {
         'name': 'test category',
@@ -42,6 +45,7 @@ def test_add_category(client, user):
 
 
 def test_update_category(client, user):
+    """Check if updating existing category is working"""
     client.force_login(user)
     category = Category.objects.create(name='category 1', is_favourite=True, user=user)
     endpoint = reverse('categories:update', args=[category.slug])
@@ -56,6 +60,7 @@ def test_update_category(client, user):
 
 
 def test_delete_category_confirmation(client, user):
+    """Check if ask user for confirmation of removing selected category is working"""
     client.force_login(user)
     category = Category.objects.create(name='category 1', is_favourite=True, user=user)
 
@@ -66,6 +71,7 @@ def test_delete_category_confirmation(client, user):
 
 
 def test_delete_category(client, user):
+    """Check if removing selected category is working"""
     client.force_login(user)
     category = Category.objects.create(name='category 1', is_favourite=True, user=user)
 
