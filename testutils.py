@@ -34,7 +34,7 @@ def create_fake_shop(user, faker, count=1):
     categories_id = list(Category.objects.all().values_list('id', flat=True))
 
     for _ in range(1, count + 1):
-        categories = sample(categories_id, k=randint(0, categories_count))
+        categories = sample(categories_id, k=randint(3, categories_count))
         shop = Shop.objects.create(**{
             'name': faker.word(),
             'user': user,
