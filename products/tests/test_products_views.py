@@ -126,6 +126,6 @@ def test_products_list_get(client, user, faker):
 
 
 def test_products_list_get_without_user(client):
-    """Check if page for list of products is redirecting not logged user to login page"""
+    """Check if view for list of products is redirecting not logged user to login page"""
     endpoint = reverse('products:list')
     assert_view_get_without_user(client, endpoint)

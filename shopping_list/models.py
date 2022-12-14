@@ -8,6 +8,7 @@ from shops.models import Shop
 
 
 class ShoppingList(models.Model):
+    """Representation of shopping list"""
     name = models.CharField(max_length=255)
     is_finished = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -24,6 +25,7 @@ class ShoppingList(models.Model):
 
 
 class ProductShoppingList(models.Model):
+    """Representation of relation between shopping lists and products"""
     shopping_list = models.ForeignKey('ShoppingList', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     is_bought = models.BooleanField(default=False)

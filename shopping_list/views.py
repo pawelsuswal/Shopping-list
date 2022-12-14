@@ -18,6 +18,7 @@ from shopping_list.models import ShoppingList, ProductShoppingList
 
 
 class ShoppingListCreateView(LoginRequiredMixin, CreateView):
+    """Display view for create new category"""
     success_url = reverse_lazy('shopping_list:list')
     model = ShoppingList
     form_class = CreateShoppingListForm
@@ -25,6 +26,8 @@ class ShoppingListCreateView(LoginRequiredMixin, CreateView):
     context_object_name = 'shopping_list'
 
     def get_initial(self):
+        """Setup initial values for new shopping list in case building it from template shopping list"""
+
         user = self.request.user
         source_slug = self.request.GET.get('source')
         source_shopping_list = ShoppingList.objects.filter(user=user, slug=source_slug)
@@ -37,6 +40,7 @@ class ShoppingListCreateView(LoginRequiredMixin, CreateView):
         return initial
 
     def get_context_data(self, **kwargs):
+        """Load additional data to view about products and units of measurement"""
         context = super(ShoppingListCreateView, self).get_context_data(**kwargs)
         user = self.request.user
         source_slug = self.request.GET.get('source')
@@ -49,10 +53,11 @@ class ShoppingListCreateView(LoginRequiredMixin, CreateView):
 
         context['products_by_categories_and_favourites'] = get_all_products(user, source_shopping_list)
         context['UNITS_OF_MEASUREMENT'] = UNITS_OF_MEASUREMENT
-        context['source_shopping_list'] = source_shopping_list
+        # context['source_shopping_list'] = source_shopping_list
         return context
 
     def form_valid(self, form):
+        """Manually save data (shopping list and then products in shopping list) from form"""
         user = self.request.user
         form.instance.user = user
         try:
@@ -80,12 +85,14 @@ class ShoppingListCreateView(LoginRequiredMixin, CreateView):
 
 
 class ShoppingListUpdateView(LoginRequiredMixin, UpdateView):
+    """Display view for editing existing shopping list"""
     success_url = reverse_lazy('shopping_list:list')
     model = ShoppingList
     form_class = CreateShoppingListForm
     template_name = 'shopping_list/create.html'
 
     def get_context_data(self, **kwargs):
+        """Add additional data about products for selected shopping list and constant for uom"""
         context = super(ShoppingListUpdateView, self).get_context_data(**kwargs)
         user = self.request.user
 
@@ -104,6 +111,8 @@ class ShoppingListUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
 
     def form_valid(self, form):
+        """Manually save data (shopping list and then products in shopping list) from form"""
+
         user = self.request.user
         form.instance.user = user
         try:
@@ -120,6 +129,7 @@ class ShoppingListUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class ShoppingListDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete selected shopping list"""
     success_url = reverse_lazy('shopping_list:list')
     model = ShoppingList
     template_name = '../templates/delete_confirmation.html'
@@ -127,7 +137,10 @@ class ShoppingListDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class ShoppingListListView(LoginRequiredMixin, views.View):
+    """Display all active shopping lists for logged user"""
+
     def get(self, request):
+        """Get and display all active shopping lists that are owned or shared to the active user"""
         user = request.user
 
         shopping_lists = ShoppingList.objects.filter(Q(user=user) | Q(shared_with_list=user),
@@ -138,7 +151,10 @@ class ShoppingListListView(LoginRequiredMixin, views.View):
 
 
 class ShoppingListUpdateProductStatus(LoginRequiredMixin, views.View):
+    """Change selected product bought status on selected shopping list to opposite"""
+
     def get(self, request, slug, product_id):
+        """Try to get requested product from selected shopping list and change it status to opposite if succeed"""
         user = request.user
         shopping_list = ShoppingList.objects.filter(user=user, slug=slug)
 
@@ -152,8 +168,10 @@ class ShoppingListUpdateProductStatus(LoginRequiredMixin, views.View):
 
 
 class ShoppingListViewComment(LoginRequiredMixin, views.View):
+    """Display view with comment for selected product from selected shopping list"""
 
     def get(self, request, slug, product_id):
+        """Try to get comment for selected product from selected shopping list and render view with it"""
         user = request.user
         previous = request.GET.get('previous')
 
@@ -168,13 +186,17 @@ class ShoppingListViewComment(LoginRequiredMixin, views.View):
         return render(request, 'shopping_list/view_comment.html', {'product': product.first(), 'previous': previous})
 
     def post(self, request, slug, product_id):
+        """Redirect to shopping list view that called comment view"""
         previous = request.POST.get('previous')
         return redirect(previous)
 
 
 class ShoppingListUpdateFinishStatus(LoginRequiredMixin, views.View):
+    """Change selected shopping list finished status to opposite"""
+
     # todo czy to jest poprawnie, że baza jest modyfikowana get'em? Przenieść na POST
     def get(self, request, slug):
+        """Try to get selected shopping list for current user and change it finised status to opposite"""
         user = request.user
         shopping_list = ShoppingList.objects.filter(user=user, slug=slug)
 
@@ -187,8 +209,10 @@ class ShoppingListUpdateFinishStatus(LoginRequiredMixin, views.View):
 
 
 class ShoppingListHistoryListView(LoginRequiredMixin, views.View):
+    """Display all finished shopping lists for logged user"""
 
     def get(self, request):
+        """Get and display all finished shopping lists that are owned by the active user"""
         user = request.user
 
         shopping_lists = ShoppingList.objects.filter(user=user, is_finished=True).order_by('-created_on')
@@ -198,8 +222,10 @@ class ShoppingListHistoryListView(LoginRequiredMixin, views.View):
 
 
 class ShoppingListFavouritesListView(LoginRequiredMixin, views.View):
+    """Display all favourite shopping lists for logged user"""
 
     def get(self, request):
+        """Get and display all favourite shopping lists that are owned by the active user"""
         user = request.user
 
         shopping_lists = ShoppingList.objects.filter(user=user, is_favourite=True).order_by('created_on')
@@ -209,6 +235,7 @@ class ShoppingListFavouritesListView(LoginRequiredMixin, views.View):
 
 
 class ShoppingListShareView(LoginRequiredMixin, UpdateView):
+    """Display view with friends list for selecting to whom shopping list should be shared with"""
     model = ShoppingList
     fields = ('name',)
     success_url = reverse_lazy('shopping_list:list')
@@ -216,6 +243,7 @@ class ShoppingListShareView(LoginRequiredMixin, UpdateView):
     context_object_name = 'shopping_list'
 
     def post(self, request, *args, **kwargs):
+        """Update shopping list according to selected friend to whom it should be selected"""
 
         user = request.user
         list_id = request.POST.get('list-id')
@@ -234,8 +262,8 @@ class ShoppingListShareView(LoginRequiredMixin, UpdateView):
 
         return redirect('shopping_list:list')
 
-    # todo czy tutaj zamiast get nie powinno być get_object_or_404? co się stanie jak nie będzie obiektu? można użyć get_object_or_404
     def get_context_data(self, **kwargs):
+        """Load additional data about current user friends and sharing status for selected shopping list"""
         context = super(ShoppingListShareView, self).get_context_data()
         user = self.request.user
         shopping_list = context['shopping_list']
@@ -263,6 +291,8 @@ class ShoppingListShareView(LoginRequiredMixin, UpdateView):
 
 
 def get_all_products(user, shopping_list=None):
+    """Returns list of all products split by favourites and categories for
+     selected user with current values from shopping list if provided"""
     all_products = Product.objects.filter(user=user).order_by('-is_favourite', 'name')
     categories_for_favourite_products, categories_for_not_favourite_products = get_categories_by_favourite(
         all_products)
@@ -317,7 +347,8 @@ def get_all_products(user, shopping_list=None):
 
 
 def get_products_for_shopping_list(user, post_data):
-    products_to_save = []
+    """Return list of product with parameters provided in post_data"""
+    products_for_shopping_list = []
 
     for item in post_data.items():
         if 'product' not in item[0]:
@@ -346,16 +377,17 @@ def get_products_for_shopping_list(user, post_data):
         if uom == 'None' or uom == '':
             uom = None
 
-        products_to_save.append({
+        products_for_shopping_list.append({
             'product': product,
             'amount': amount,
             'uom': uom,
             'comment': comment,
         })
-    return products_to_save
+    return products_for_shopping_list
 
 
 def save_products_in_shopping_list(products_to_save, shopping_list):
+    """Saves products for shopping list in database"""
     for product_to_save in products_to_save:
         shopping_list.productshoppinglist_set.update_or_create(
             product=product_to_save['product'],
@@ -368,11 +400,13 @@ def save_products_in_shopping_list(products_to_save, shopping_list):
 
 
 def clear_products_in_shopping_list(shopping_list: ShoppingList):
+    """Removes all products from shopping list"""
     for product in shopping_list.productshoppinglist_set.all():
         product.delete()
 
 
 def get_shopping_lists(shopping_lists, user=None):
+    """Returns list of shopping lists with products related to each of them ordered by category"""
     uom = dict(UNITS_OF_MEASUREMENT)
     data_to_render = []
     for shopping_list in shopping_lists:

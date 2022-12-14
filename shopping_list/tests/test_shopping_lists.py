@@ -7,6 +7,7 @@ from testutils import assert_view_get_without_user, create_fake_products, create
 
 
 def test_create_shopping_list_get(client, user, faker):
+    """Check if view for create new shoppping list is loading"""
     client.force_login(user)
     create_fake_products(user, faker, 5)
     endpoint = reverse('shopping_list:create')
@@ -19,11 +20,13 @@ def test_create_shopping_list_get(client, user, faker):
 
 
 def test_create_shopping_list_get_without_user(client):
+    """Check if page for create new shopping list is redirecting not logged user to login page"""
     endpoint = reverse('shopping_list:create')
     assert_view_get_without_user(client, endpoint)
 
 
 def test_create_shopping_list_post(db, client, user, faker):
+    """Check if shopping list is created on post method"""
     client.force_login(user)
 
     input_parameters = {
@@ -39,6 +42,7 @@ def test_create_shopping_list_post(db, client, user, faker):
 
 
 def test_update_shopping_list_get(db, client, user, faker):
+    """Check if view for update existing new shoppping list is loading"""
     client.force_login(user)
 
     create_fake_shopping_lists(user, faker)
@@ -53,6 +57,7 @@ def test_update_shopping_list_get(db, client, user, faker):
 
 
 def test_update_shopping_list_get_without_user(db, client, user, faker):
+    """Check if page for update existing shopping list is redirecting not logged user to login page"""
     create_fake_shopping_lists(user, faker)
 
     shopping_list = ShoppingList.objects.first()
@@ -62,6 +67,7 @@ def test_update_shopping_list_get_without_user(db, client, user, faker):
 
 
 def test_update_shopping_list_post(db, client, user, faker):
+    """Check if shopping list is updated on post method"""
     client.force_login(user)
 
     create_fake_shopping_lists(user, faker)
@@ -79,6 +85,7 @@ def test_update_shopping_list_post(db, client, user, faker):
 
 
 def test_delete_shopping_list_get(client, user, faker):
+    """Check if view for delete existing shopping list is loading confirmation page"""
     client.force_login(user)
 
     create_fake_shopping_lists(user, faker, 1)
@@ -91,6 +98,7 @@ def test_delete_shopping_list_get(client, user, faker):
 
 
 def test_delete_shopping_list_get_without_user(client, user, faker):
+    """Check if delete request is redirecting not logged user to login page"""
     create_fake_shopping_lists(user, faker, 1)
     shopping_list = ShoppingList.objects.first()
     endpoint = reverse('shopping_list:delete', args=[shopping_list.slug])
@@ -98,6 +106,7 @@ def test_delete_shopping_list_get_without_user(client, user, faker):
 
 
 def test_delete_shopping_list_post(client, user, faker):
+    """Check if shopping list is deleted on post method"""
     client.force_login(user)
 
     create_fake_shopping_lists(user, faker, 1)
@@ -113,6 +122,7 @@ def test_delete_shopping_list_post(client, user, faker):
 
 
 def test_shopping_list_list_get(client, user, faker):
+    """Check if view for list of shopping lists is loading"""
     client.force_login(user)
     create_fake_shopping_lists(user, faker)
 
@@ -124,6 +134,7 @@ def test_shopping_list_list_get(client, user, faker):
 
 
 def test_shopping_list_list_get_without_user(client, user, faker):
+    """Check if view for list of shopping lists is redirecting not logged user to login page"""
     create_fake_shopping_lists(user, faker)
 
     endpoint = reverse('shopping_list:list')
@@ -132,6 +143,7 @@ def test_shopping_list_list_get_without_user(client, user, faker):
 
 
 def test_update_product_status(client, user, faker):
+    """Check if user request is changing product status in shopping list to opposite"""
     client.force_login(user)
 
     create_fake_shopping_lists(user, faker)
@@ -150,6 +162,7 @@ def test_update_product_status(client, user, faker):
 
 
 def test_update_product_status_without_user(client, user, faker):
+    """Check if view for change product status is redirecting not logged user to login page"""
     create_fake_shopping_lists(user, faker)
     shopping_list = ShoppingList.objects.first()
     add_products_to_shopping_list(shopping_list, user, faker)
@@ -161,6 +174,8 @@ def test_update_product_status_without_user(client, user, faker):
 
 
 def test_comment_view_get(client, user, faker):
+    """Check if view for show comment for selected product in shopping list is loading"""
+
     client.force_login(user)
 
     create_fake_shopping_lists(user, faker)
@@ -177,6 +192,7 @@ def test_comment_view_get(client, user, faker):
 
 
 def test_comment_view_get_without_user(client, user, faker):
+    """Check if view for show comment is redirecting not logged user to login page"""
     create_fake_shopping_lists(user, faker)
     shopping_list = ShoppingList.objects.first()
     add_products_to_shopping_list(shopping_list, user, faker, comment=True)
@@ -188,6 +204,7 @@ def test_comment_view_get_without_user(client, user, faker):
 
 
 def test_comment_view_post(client, user, faker):
+    """Check if post method of view comment is redirecting to previous view of one of the shopping lists groups"""
     client.force_login(user)
 
     create_fake_shopping_lists(user, faker)
@@ -206,6 +223,7 @@ def test_comment_view_post(client, user, faker):
 
 
 def test_update_shopping_list_status_get(client, user, faker):
+    """Check if user request is changing shopping list status to opposite"""
     client.force_login(user)
 
     create_fake_shopping_lists(user, faker)
@@ -224,6 +242,7 @@ def test_update_shopping_list_status_get(client, user, faker):
 
 
 def test_update_shopping_list_status_without_user(client, user, faker):
+    """Check if view for change shopping list status is redirecting not logged user to login page"""
     create_fake_shopping_lists(user, faker)
     shopping_list = ShoppingList.objects.first()
 
@@ -232,6 +251,7 @@ def test_update_shopping_list_status_without_user(client, user, faker):
 
 
 def test_shopping_list_history_view(client, user, faker):
+    """Check if view for list of finished shopping lists is loading"""
     client.force_login(user)
     create_fake_shopping_lists(user, faker, finished=True)
 
@@ -243,6 +263,7 @@ def test_shopping_list_history_view(client, user, faker):
 
 
 def test_shopping_list_history_view_without_user(client, user, faker):
+    """Check if view for list of finished shopping lists is redirecting not logged user to login page"""
     create_fake_shopping_lists(user, faker, finished=True)
 
     endpoint = reverse('shopping_list:history')
@@ -251,6 +272,7 @@ def test_shopping_list_history_view_without_user(client, user, faker):
 
 
 def test_shopping_list_favourite_view(client, user, faker):
+    """Check if view for list of favourite shopping lists is loading"""
     client.force_login(user)
     create_fake_shopping_lists(user, faker, favourite=True)
 
@@ -261,7 +283,8 @@ def test_shopping_list_favourite_view(client, user, faker):
     assert response.context['data_to_render']
 
 
-def test_shopping_list_history_view_without_user(client, user, faker):
+def test_shopping_list_favourite_view_without_user(client, user, faker):
+    """Check if view for list of favourite shopping lists is redirecting not logged user to login page"""
     create_fake_shopping_lists(user, faker, favourite=True)
 
     endpoint = reverse('shopping_list:favourites')
