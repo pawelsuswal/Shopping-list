@@ -6,5 +6,6 @@ from django.views import View
 
 
 class HomeView(View):
+    """Show home page"""
     def get(self, request):
         return render(request, 'home/home.html')
