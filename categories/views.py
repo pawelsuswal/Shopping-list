@@ -43,4 +43,5 @@ class CategoryListView(LoginRequiredMixin, ListView):
     allow_empty = 1
 
     def get_queryset(self):
+        """Setup queryset to show only categories for current user sorted by favourites and name"""
         return Category.objects.filter(user=self.request.user).order_by('-is_favourite', 'name')

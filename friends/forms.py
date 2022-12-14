@@ -13,10 +13,12 @@ class InviteCreateForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        """Add request data to form"""
         self.request = kwargs.pop('request')
         super(InviteCreateForm, self).__init__(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
+        """Check if user don't invite him/herself or don't invite already invited user"""
         requested_username = self.cleaned_data.get('requested_friend_username')
         user = self.request.user
         if requested_username == user.username:

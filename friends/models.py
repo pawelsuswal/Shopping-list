@@ -4,6 +4,7 @@ from django.db import models
 
 
 class UserFriend(models.Model):
+    """Representation of user friends"""
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='user')
     friend = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='friend')
     created = models.DateTimeField(auto_now_add=True)
@@ -14,6 +15,7 @@ class UserFriend(models.Model):
 
 
 class Invite(models.Model):
+    """Representation of invites to friends list"""
     send_from = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='send_from')
     send_to = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='send_to', null=True)
     requested_friend_username = models.CharField(max_length=255)
