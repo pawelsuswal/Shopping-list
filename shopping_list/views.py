@@ -153,7 +153,7 @@ class ShoppingListListView(LoginRequiredMixin, views.View):
 class ShoppingListUpdateProductStatus(LoginRequiredMixin, views.View):
     """Change selected product bought status on selected shopping list to opposite"""
 
-    def get(self, request, slug, product_id):
+    def post(self, request, slug, product_id):
         """Try to get requested product from selected shopping list and change it status to opposite if succeed"""
         user = request.user
         shopping_list = ShoppingList.objects.filter(user=user, slug=slug)
