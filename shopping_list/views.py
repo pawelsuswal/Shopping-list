@@ -195,7 +195,7 @@ class ShoppingListUpdateFinishStatus(LoginRequiredMixin, views.View):
     """Change selected shopping list finished status to opposite"""
 
     # todo czy to jest poprawnie, że baza jest modyfikowana get'em? Przenieść na POST
-    def post(self, request, slug):
+    def get(self, request, slug):
         """Try to get selected shopping list for current user and change it finised status to opposite"""
         user = request.user
         shopping_list = ShoppingList.objects.filter(user=user, slug=slug)
