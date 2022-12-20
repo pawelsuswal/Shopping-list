@@ -78,7 +78,7 @@
                         <div>
                             {% if product.comment != '' %}
                                 <a href="{% url 'shopping_list:view_comment' slug=item.0.slug product_id=product.product_id %}?previous={{ request.path|urlencode }}#{{ item.0.id }}_{{ product.product_id }}"
-                                   class="btn btn-success btn-sm">View comment</a>
+                                   class="btn btn-success btn-sm me-2">View comment</a>
                             {% endif %}
                             <div class="d-inline-flex" style="width: 4rem">
                                 <form action="{% url 'shopping_list:change_product_status' slug=item.0.slug product_id=product.product_id %}#{{ item.0.id }}_{{ product.product_id }}"
