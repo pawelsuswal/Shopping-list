@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block title %}
     Create shop
@@ -7,7 +8,7 @@
 {% block container %}
     <form action="" method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form | crispy }}
         <input type="submit" value="Save" class="btn btn-sm btn-success">
         <a href="{% url 'shops:list' %}" class="btn btn-sm btn-success">Cancel</a>
     </form>
