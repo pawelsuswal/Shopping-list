@@ -9,6 +9,7 @@ django_debug_toolbar==3.8.1
 exceptiongroup==1.0.4
 Faker==15.3.4
 iniconfig==1.1.1
+mysqlclient==2.1.1
 packaging==21.3
 pluggy==1.0.0
 pyparsing==3.0.9
