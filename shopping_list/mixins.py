@@ -1,16 +1,16 @@
 from django.core.exceptions import ObjectDoesNotExist
 
+from products.mixins import ProductMixins
 from products.models import Product, UNITS_OF_MEASUREMENT
-from products.views import get_categories_by_favourite
 from shopping_list.models import ShoppingList, ProductShoppingList
 
 
-class ShoppingListMixins:
+class ShoppingListMixins(ProductMixins):
     def get_all_products(self, user, shopping_list=None):
         """Returns list of all products split by favourites and categories for
          selected user with current values from shopping list if provided"""
         all_products = Product.objects.filter(user=user).order_by('-is_favourite', 'name')
-        categories_for_favourite_products, categories_for_not_favourite_products = get_categories_by_favourite(
+        categories_for_favourite_products, categories_for_not_favourite_products = self.get_categories_by_favourite(
             all_products)
 
         products_by_categories_and_favourites = [[True, []], [False, []]]

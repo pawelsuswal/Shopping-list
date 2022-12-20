@@ -5,6 +5,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView
 
 from products.forms import CreateProductForm
+from products.mixins import ProductMixins
 from products.models import Product
 
 
@@ -51,11 +52,10 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('products:list')
     model = Product
     template_name = '../templates/delete_confirmation.html'
-    #todo poprawić link w zalezności na której zakładce jest użytkownik
     extra_context = {'cancel_operation_url': 'products:list'}
 
 
-class ProductListView(LoginRequiredMixin, ListView):
+class ProductListView(LoginRequiredMixin, ListView, ProductMixins):
     """Display all products for logged user"""
     template_name = 'products/list.html'
     model = Product
@@ -72,29 +72,11 @@ class ProductListView(LoginRequiredMixin, ListView):
 
         all_products = context['products']
 
-        categories_for_favourite_products, categories_for_not_favourite_products = get_categories_by_favourite(
+        categories_for_favourite_products, categories_for_not_favourite_products = self.get_categories_by_favourite(
             all_products)
         context['categories_for_favourite_products'] = categories_for_favourite_products
         context['categories_for_not_favourite_products'] = categories_for_not_favourite_products
         return context
 
 
-def get_categories_by_favourite(all_products):
-    """Return 2 lists of categories - one for favourite products and second for not favourites one"""
-    categories_for_favourite_products = all_products.filter(is_favourite=True).values_list('category__name')
-    categories_for_favourite_products = set(categories_for_favourite_products)
-    categories_for_favourite_products = list(itertools.chain(*categories_for_favourite_products))
 
-    categories_for_not_favourite_products = all_products.filter(is_favourite=False).values_list('category__name')
-    categories_for_not_favourite_products = set(categories_for_not_favourite_products)
-    categories_for_not_favourite_products = list(itertools.chain(*categories_for_not_favourite_products))
-
-    if None in categories_for_favourite_products:
-        categories_for_favourite_products[categories_for_favourite_products.index(None)] = ''
-
-    if None in categories_for_not_favourite_products:
-        categories_for_not_favourite_products[categories_for_not_favourite_products.index(None)] = ''
-
-    categories_for_favourite_products.sort()
-    categories_for_not_favourite_products.sort()
-    return categories_for_favourite_products, categories_for_not_favourite_products
