@@ -71,20 +71,22 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <div>
+                        <div class="">
                             {% if product.comment != '' %}
                                 <a href="{% url 'shopping_list:view_comment' slug=item.0.slug product_id=product.product_id %}?previous={{ request.path|urlencode }}#{{ item.0.id }}_{{ product.product_id }}"
                                    class="btn btn-success btn-sm">View comment</a>
                             {% endif %}
-                            <form action="{% url 'shopping_list:change_product_status' slug=item.0.slug product_id=product.product_id %}#{{ item.0.id }}_{{ product.product_id }}"
-                                  method="post">
-                                {% csrf_token %}
-                                {% if product.is_bought %}
-                                    <input type="submit" class="btn btn-success btn-sm" value="Uncheck">
-                                {% else %}
-                                    <input type="submit" class="btn btn-danger btn-sm" value="Check">
-                                {% endif %}
-                            </form>
+                            <div class="d-inline-flex" style="width: 4rem">
+                                <form action="{% url 'shopping_list:change_product_status' slug=item.0.slug product_id=product.product_id %}#{{ item.0.id }}_{{ product.product_id }}"
+                                      method="post">
+                                    {% csrf_token %}
+                                    {% if product.is_bought %}
+                                        <input type="submit" class="btn btn-success btn-sm" value="Uncheck">
+                                    {% else %}
+                                        <input type="submit" class="btn btn-danger btn-sm" value="Check">
+                                    {% endif %}
+                                </form>
+                            </div>
                         </div>
                     </li>
                 {% endfor %}
