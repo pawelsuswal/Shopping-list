@@ -5,25 +5,84 @@
 {% endblock %}
 
 {% block container %}
-    <ul class="list-group mt-3 col-6">
-        {% for shop_category in shop_categories %}
-            <li class="list-group-item">
-                <form action="{% url 'shops:reorder' slug=shop_category.shop.slug category=shop_category.category_id %}"
-                      method="post">
-                    {% csrf_token %}
-                    <span class=" text-black col-md-4">{{ shop_category.order|add:1 }}. {{ shop_category.category.name }}</span>
-                    {% if not forloop.first %}
-                        <input type="submit" value="&#8607" name="top" class="btn btn-success btn-sm">
-                        <input type="submit" value="&#8593" name="up" class="btn btn-success btn-sm">
-                    {% endif %}
-                    {% if not forloop.last %}
-                        <input type="submit" value="&#8595" name="down" class="btn btn-success btn-sm">
-                        <input type="submit" value="&#8609" name="bottom" class="btn btn-success btn-sm ">
-                    {% endif %}
-                </form>
-            </li>
-        {% endfor %}
-    </ul>
+    <h2>Reorder categories for {{ shop_categories.0.shop }}</h2>
+    <div class="row">
+        <div class="col-sm-6">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col" style="width: 80%"></th>
+                    <th scope="col" style="width: 5%"></th>
+                    <th scope="col" style="width: 5%"></th>
+                    <th scope="col" style="width: 5%"></th>
+                    <th scope="col" style="width: 5%"></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for shop_category in shop_categories %}
+                    <tr>
+                        <form action="
+                        {% url 'shops:reorder' slug=shop_category.shop.slug category=shop_category.category_id %}"
+                              method="post">
+                            {% csrf_token %}
+                            <td>
+                                <span class=" text-black col-md-4">{{ shop_category.order|add:1 }}. {{ shop_category.category.name }}</span>
+                            </td>
+                            {% if not forloop.first %}
+                                <td>
+                                    <input type="submit" value="&#8607" name="top" class="btn btn-success btn-sm">
+                                </td>
+                                <td>
+                                    <input type="submit" value="&#8593" name="up" class="btn btn-success btn-sm">
+                                </td>
+                            {% else %}
+                                <td></td>
+                                <td></td>
+                            {% endif %}
+
+                            {% if not forloop.last %}
+                                <td>
+                                    <input type="submit" value="&#8595" name="down" class="btn btn-success btn-sm">
+                                </td>
+                                <td>
+                                    <input type="submit" value="&#8609" name="bottom" class="btn btn-success btn-sm ">
+                                </td>
+                            {% else %}
+                                <td></td>
+                                <td></td>
+                            {% endif %}
+
+                        </form>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+    {#    <ul class="list-group mt-3 col-6">#}
+    {##}
+    {#        {% for shop_category in shop_categories %}#}
+    {#            <li class="list-group-item">#}
+    {#                <form action="{% url 'shops:reorder' slug=shop_category.shop.slug category=shop_category.category_id %}"#}
+    {#                      method="post">#}
+    {#                    {% csrf_token %}#}
+    {#                    <span class=" text-black col-md-4">{{ shop_category.order|add:1 }}. {{ shop_category.category.name }}</span>#}
+    {#                    {% if not forloop.first %}#}
+    {#                        <input type="submit" value="&#8607" name="top" class="btn btn-success btn-sm">#}
+    {#                        <input type="submit" value="&#8593" name="up" class="btn btn-success btn-sm">#}
+    {#                    {% endif %}#}
+    {#                    {% if not forloop.last %}#}
+    {#                        <input type="submit" value="&#8595" name="down" class="btn btn-success btn-sm">#}
+    {#                        <input type="submit" value="&#8609" name="bottom" class="btn btn-success btn-sm ">#}
+    {#                    {% endif %}#}
+    {#                </form>#}
+    {#            </li>#}
+    {#        {% endfor %}#}
+    {#    </ul>#}
 
     <a href="{% url 'shops:list' %}" class="btn btn-success btn-sm mt-5">Done</a>
 {% endblock %}
