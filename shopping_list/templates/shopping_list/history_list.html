@@ -27,10 +27,16 @@
                     </div>
                 </div>
                 <div class="">
-                    <a href="{% url 'shopping_list:create' %}?source={{ item.0.slug }}" class="btn btn-success btn-sm">Use
-                        as template</a>
-                    <a href="{% url 'shopping_list:change_finish_status' slug=item.0.slug %}"
-                       class="btn btn-warning btn-sm">Not finished</a>
+                    <a href="{% url 'shopping_list:create' %}?source={{ item.0.slug }}"
+                       class="btn btn-success btn-sm me-2">Use as template</a>
+                    <div class="d-inline-flex me-2" style="width: 6rem">
+                        <form action="{% url 'shopping_list:change_finish_status' slug=item.0.slug %}" method="post">
+                            {% csrf_token %}
+                            <input type="submit" class="btn btn-warning btn-sm" value="Not finished">
+                        </form>
+                    </div>
+                    {#                    <a href="{% url 'shopping_list:change_finish_status' slug=item.0.slug %}"#}
+                    {#                       class="btn btn-warning btn-sm me-2">Not finished</a>#}
                     <a href="{% url 'shopping_list:delete' slug=item.0.slug %}"
                        class="btn btn-danger btn-sm">Delete</a>
                 </div>

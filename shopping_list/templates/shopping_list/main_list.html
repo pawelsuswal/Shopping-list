@@ -34,19 +34,18 @@
                     {% if item.2 %}
                         <button disabled class="btn btn-info btn-sm me-2">Shared</button>
                     {% else %}
-                        <a href="{% url 'shopping_list:share' slug=item.0.slug %}" class="btn btn-info btn-sm">Share</a>
+                        <a href="{% url 'shopping_list:share' slug=item.0.slug %}" class="btn btn-info btn-sm me-2">Share</a>
                         <a href="{% url 'shopping_list:update' slug=item.0.slug %}"
                            class="btn btn-warning btn-sm me-2">Edit</a>
                         <a href="{% url 'shopping_list:delete' slug=item.0.slug %}"
                            class="btn btn-danger btn-sm me-2">Delete</a>
                     {% endif %}
                     <div class="d-inline-flex" style="width: 4rem">
-                        <form action="{% url 'shopping_list:change_finish_status' slug=item.0.slug %}">
+                        <form action="{% url 'shopping_list:change_finish_status' slug=item.0.slug %}" method="post">
+                            {% csrf_token %}
                             <input type="submit" class="btn btn-success btn-sm" value="Finished">
                         </form>
                     </div>
-{#                    <a href="{% url 'shopping_list:change_finish_status' slug=item.0.slug %}"#}
-{#                       class="btn btn-success btn-sm">Finished</a>#}
                 </div>
             </li>
             <ul class="">
