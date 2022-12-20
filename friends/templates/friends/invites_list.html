@@ -25,10 +25,22 @@
                                 {{ invite.send_from.username }}
                             </td>
                             <td>
-                                <a href="{% url 'friends:invite_response' send_from=invite.send_from_id response=1 %}" class="btn btn-success btn-sm">Accept</a>
+                                <div class="d-inline-flex" style="width: 4rem">
+                                    <form action="{% url 'friends:invite_response' send_from=invite.send_from_id response=1 %}"
+                                          method="post">
+                                        {% csrf_token %}
+                                        <input type="submit" class="btn btn-success btn-sm" value="Accept">
+                                    </form>
+                                </div>
                             </td>
                             <td>
-                                <a href="{% url 'friends:invite_response' send_from=invite.send_from_id response=0 %}" class="btn btn-danger btn-sm">Decline</a>
+                                <div class="d-inline-flex" style="width: 4rem">
+                                    <form action="{% url 'friends:invite_response' send_from=invite.send_from_id response=0 %}"
+                                          method="post">
+                                        {% csrf_token %}
+                                        <input type="submit" class="btn btn-danger btn-sm" value="Decline">
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     {% endif %}
@@ -53,7 +65,7 @@
                                 {{ invite.requested_friend_username }}
                             </td>
                             <td>
-                                <form action="{% url 'friends:delete_invite'%}" method="post">
+                                <form action="{% url 'friends:delete_invite' %}" method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="pk" value="{{ invite.id }}">
                                     <input type="submit" value="Cancel" class="btn btn-danger btn-sm">

@@ -58,7 +58,7 @@ class InviteListView(LoginRequiredMixin, ListView):
 class InviteChangeStatus(LoginRequiredMixin, views.View):
     """Handle user accept or decline invite action"""
 
-    def get(self, request, send_from, response):
+    def post(self, request, send_from, response):
         """Check if invite exist, resolve user decision and remove invite"""
         user = request.user
         invite = get_object_or_404(Invite, send_to_id=user.id, send_from_id=send_from)
@@ -66,6 +66,9 @@ class InviteChangeStatus(LoginRequiredMixin, views.View):
             friend = get_user_model().objects.get(id=send_from)
             UserFriend.objects.create(user=user, friend=friend)
             UserFriend.objects.create(user=friend, friend=user)
+            revert_invite = Invite.objects.filter(send_to_id=send_from, send_from_id=user.id)
+            if revert_invite.exists():
+                revert_invite.delete()
 
         if response in [0, 1]:
             invite.delete()
