@@ -154,7 +154,7 @@ def test_update_product_status(client, user, faker):
 
     product_status_before_update = product.is_bought
     endpoint = reverse('shopping_list:change_product_status', args=[shopping_list.slug, product.id])
-    response = client.get(endpoint)
+    response = client.post(endpoint)
 
     assert response.status_code == 302
     product.refresh_from_db()
@@ -170,7 +170,10 @@ def test_update_product_status_without_user(client, user, faker):
     product = shopping_list.productshoppinglist_set.first()
 
     endpoint = reverse('shopping_list:change_product_status', args=[shopping_list.slug, product.id])
-    assert_view_get_without_user(client, endpoint)
+    response = client.post(endpoint)
+
+    assert response.status_code == 302
+    assert response.url.startswith(reverse('login'))
 
 
 def test_comment_view_get(client, user, faker):
@@ -222,7 +225,7 @@ def test_comment_view_post(client, user, faker):
     assert response.url.startswith(previous)
 
 
-def test_update_shopping_list_status_get(client, user, faker):
+def test_update_shopping_list_status_post(client, user, faker):
     """Check if user request is changing shopping list status to opposite"""
     client.force_login(user)
 
@@ -234,7 +237,7 @@ def test_update_shopping_list_status_get(client, user, faker):
     shopping_list_status_before_update = shopping_list.is_finished
 
     endpoint = reverse('shopping_list:change_finish_status', args=[shopping_list.slug])
-    response = client.get(endpoint)
+    response = client.post(endpoint)
 
     assert response.status_code == 302
     shopping_list.refresh_from_db()

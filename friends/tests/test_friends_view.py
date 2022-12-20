@@ -74,7 +74,7 @@ def test_invite_delete_post_without_user(client, user, user2):
     assert_view_get_without_user(client, endpoint)
 
 
-def test_invite_response_get(client, user, user2):
+def test_invite_response_post(client, user, user2):
     create_fake_invite_to_existing_user(user, user2)
     client.force_login(user2)
 
@@ -83,7 +83,7 @@ def test_invite_response_get(client, user, user2):
         1,
     ])
 
-    response = client.get(endpoint)
+    response = client.post(endpoint)
 
     assert response.status_code == 302
 
@@ -91,14 +91,17 @@ def test_invite_response_get(client, user, user2):
     assert UserFriend.objects.get(user=user2, friend=user)
 
 
-def test_invite_response_get_without_user(client, user, user2):
+def test_invite_response_post_without_user(client, user, user2):
     create_fake_invite_to_existing_user(user, user2)
 
     endpoint = reverse('friends:invite_response', args=[
         user.id,
         1,
     ])
-    assert_view_get_without_user(client, endpoint)
+    response = client.post(endpoint)
+
+    assert response.status_code == 302
+    assert response.url.startswith(reverse('login'))
 
 
 def test_friend_list_get(client, user, user2):
