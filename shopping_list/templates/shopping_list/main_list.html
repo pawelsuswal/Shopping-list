@@ -29,19 +29,24 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="">
+                <div>
 
                     {% if item.2 %}
-                        <button disabled class="btn btn-info btn-sm">Shared</button>
+                        <button disabled class="btn btn-info btn-sm me-2">Shared</button>
                     {% else %}
                         <a href="{% url 'shopping_list:share' slug=item.0.slug %}" class="btn btn-info btn-sm">Share</a>
                         <a href="{% url 'shopping_list:update' slug=item.0.slug %}"
-                           class="btn btn-warning btn-sm">Edit</a>
+                           class="btn btn-warning btn-sm me-2">Edit</a>
                         <a href="{% url 'shopping_list:delete' slug=item.0.slug %}"
-                           class="btn btn-danger btn-sm">Delete</a>
+                           class="btn btn-danger btn-sm me-2">Delete</a>
                     {% endif %}
-                    <a href="{% url 'shopping_list:change_finish_status' slug=item.0.slug %}"
-                       class="btn btn-success btn-sm">Finished</a>
+                    <div class="d-inline-flex" style="width: 4rem">
+                        <form action="{% url 'shopping_list:change_finish_status' slug=item.0.slug %}">
+                            <input type="submit" class="btn btn-success btn-sm" value="Finished">
+                        </form>
+                    </div>
+{#                    <a href="{% url 'shopping_list:change_finish_status' slug=item.0.slug %}"#}
+{#                       class="btn btn-success btn-sm">Finished</a>#}
                 </div>
             </li>
             <ul class="">
@@ -71,7 +76,7 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="">
+                        <div>
                             {% if product.comment != '' %}
                                 <a href="{% url 'shopping_list:view_comment' slug=item.0.slug product_id=product.product_id %}?previous={{ request.path|urlencode }}#{{ item.0.id }}_{{ product.product_id }}"
                                    class="btn btn-success btn-sm">View comment</a>
