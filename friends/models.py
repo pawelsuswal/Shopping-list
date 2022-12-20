@@ -13,6 +13,9 @@ class UserFriend(models.Model):
     class Meta:
         unique_together = ('user', 'friend')
 
+    def __str__(self):
+        return f'User: {self.user.name}, friend: {self.friend.name}'
+
 
 class Invite(models.Model):
     """Representation of invites to friends list"""
@@ -23,3 +26,8 @@ class Invite(models.Model):
 
     class Meta:
         unique_together = ('send_from', 'requested_friend_username')
+
+    def __str__(self):
+        return f'Send by: {self.send_from.name}, ' \
+               f'requested username: {self.requested_friend_username}, ' \
+               f'found user: {self.send_to.name}'
