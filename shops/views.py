@@ -49,7 +49,6 @@ class ShopUpdateView(LoginRequiredMixin, UpdateView):
         """Manually save data (shop and then categories with correct order) from form"""
         shop = form.save(commit=False)
         shop_categories = shop.shopcategory_set.all()
-
         if 'categories' in form.changed_data:
             categories_id_list = list(form.cleaned_data['categories'].order_by('name').values_list('id', flat=True))
             order_to_assign = -1

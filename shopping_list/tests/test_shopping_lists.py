@@ -6,7 +6,7 @@ from testutils import assert_view_get_without_user, create_fake_products, create
     add_products_to_shopping_list
 
 
-def test_create_shopping_list_get(client, user, faker):
+def test_create_shopping_list_get(db, client, user, faker):
     """Check if view for create new shoppping list is loading"""
     client.force_login(user)
     create_fake_products(user, faker, 5)
@@ -142,7 +142,7 @@ def test_shopping_list_list_get_without_user(client, user, faker):
     assert_view_get_without_user(client, endpoint)
 
 
-def test_update_product_status(client, user, faker):
+def test_update_product_status(db, client, user, faker):
     """Check if user request is changing product status in shopping list to opposite"""
     client.force_login(user)
 
@@ -153,7 +153,7 @@ def test_update_product_status(client, user, faker):
     product = shopping_list.productshoppinglist_set.first()
 
     product_status_before_update = product.is_bought
-    endpoint = reverse('shopping_list:change_product_status', args=[shopping_list.slug, product.id])
+    endpoint = reverse('shopping_list:change_product_status', args=[shopping_list.slug, product.product.id])
     response = client.post(endpoint)
 
     assert response.status_code == 302
@@ -187,7 +187,7 @@ def test_comment_view_get(client, user, faker):
 
     product = shopping_list.productshoppinglist_set.first()
 
-    endpoint = reverse('shopping_list:view_comment', args=[shopping_list.slug, product.id])
+    endpoint = reverse('shopping_list:view_comment', args=[shopping_list.slug, product.product.id])
     response = client.get(endpoint)
 
     assert response.status_code == 200

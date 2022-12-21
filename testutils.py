@@ -1,3 +1,4 @@
+import pytest
 from django.urls import reverse
 from django.utils.text import slugify
 
@@ -77,7 +78,7 @@ def create_fake_shopping_lists(user, faker, count=1, favourite=False, finished=F
         if finished:
             is_finished = not is_finished
         shopping_list = ShoppingList.objects.create(
-            name=f'Shopping list + {counter}',
+            name=f'Shopping list {counter}',
             is_finished=is_finished,
             is_favourite=is_favourite,
             user=user,

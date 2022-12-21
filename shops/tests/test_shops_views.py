@@ -74,7 +74,7 @@ def test_update_shop_post(client, user, faker):
     input_parameters = {
         'name': shop_new_name,
         'is_favourite': shop.is_favourite,
-        'categories': shop.shopcategory_set.all().values_list('id', flat=True),
+        'categories': list(shop.shopcategory_set.all().values_list('category_id', flat=True)),
     }
 
     response = client.post(endpoint, input_parameters)
