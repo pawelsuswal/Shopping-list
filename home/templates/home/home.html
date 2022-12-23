@@ -8,5 +8,30 @@
     <h2>Welcome to shopping list app</h2>
     {% if not user.is_authenticated %}
         <p>Please login to access all features!</p>
+    {% else %}
+        <ul>
+            {% if dont_have_categories %}
+                <li>
+                    <span>You don't have any categories for products, make some now. They will be very useful.</span>
+                </li>
+            {% endif %}
+            {% if dont_have_shops %}
+                <li>
+                    <span>You don't have any shops defined yet. Go and make some.</span><br>
+                    {% if dont_have_categories %}
+                        <span>Keep in mind that categories are key feature of shop, make some in first place.</span>
+                    {% endif %}
+                </li>
+            {% endif %}
+            {% if dont_have_products %}
+                <li>
+                    <span>You don't any products yet. Go and make some.</span><br>
+                    {% if dont_have_categories %}
+                        <span>Keep in mind that you should have some categories defined first, so you can assign them to products.</span>
+                    {% endif %}
+                </li>
+            {% endif %}
+        </ul>
     {% endif %}
+
 {% endblock %}
